@@ -1,0 +1,15 @@
+# Project name subfolder:
+MeshToImage/
+
+# VS settings, debugs and builds:
+.vs/
+x64/
+
+# Debug subfolder:
+logs/
+
+# VS project files in root:
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
