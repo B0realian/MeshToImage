@@ -9,6 +9,8 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "MeshObject.h"
+#include "Texture.h"
 
 
 GLFWwindow* mainWindow = NULL;
@@ -22,11 +24,14 @@ const int SHADER = 0;
 const int PROGRAM = 1;
 std::map<std::string, int> uniformRegisterLocation;
 bool bWireFrameMode = false;
-std::string vShaderName;
-std::string fShaderName;
+std::string vShaderName = "shaders/texOrbCam.vert";
+std::string fShaderName = "shaders/texture.frag";
 
-std::string objFile;
-std::string testObj;
+MeshObject mesh;
+Texture texture;
+std::string objFile = "objects/mega.obj";
+std::string testObj = "objects/testObject.obj";
+std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
 
 float camYaw = 0.f;
@@ -59,25 +64,28 @@ int main()
 	if (!Init())
 		return -1;
 
-	// Load mesh
+	mesh.LoadObj(objFile);
+	texture.LoadTexture(texFile, true);
 
 	CompileShaders(vShaderName, fShaderName);
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glm::mat4 model(1.f), view(1.f), projection(1.f);
 		MoveCamera(camYaw, camPitch);
 		model = glm::translate(model, subjectPos);
 		view = glm::lookAt(camPosition, subjectPos, camUp);
 		projection = glm::perspective(glm::radians(45.f), (float)mainWindowWidth / (float)mainWindowHeight, 0.1f, 100.f);
 
+		texture.Bind();
+
 		glUseProgram(shaderProgram);
 		SetUniform("model", model);
 		SetUniform("view", view);
 		SetUniform("projection", projection);
 
-		// DRAW
+		mesh.DrawTriangles();
 
 		glfwSwapBuffers(mainWindow);
 		glfwPollEvents();
@@ -119,7 +127,7 @@ bool Init()
 	glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 1.f);
 	glViewport(0, 0, mainWindowWidth, mainWindowHeight);
 	glfwSwapInterval(0);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	return true;
 }

@@ -63,20 +63,21 @@ bool MeshObject::LoadObj(const std::string filename)
                 if (match != 9)
                     std::cout << "Failed to parse .obj." << std::endl;
 
-                vertexIndex.push_back(v1);
-                vertexIndex.push_back(v2);
-                vertexIndex.push_back(v3);
-                uvIndex.push_back(t1);
-                uvIndex.push_back(t2);
-                uvIndex.push_back(t3);
+                vertexIndex.push_back(v1 - 1);
+                vertexIndex.push_back(v2 - 1);
+                vertexIndex.push_back(v3 - 1);
+                uvIndex.push_back(t1 - 1);
+                uvIndex.push_back(t2 - 1);
+                uvIndex.push_back(t3 - 1);
+                // Not bothering with normals at the moment
             }
         }
         file.close();
 
         for (unsigned int i = 0; i < vertexIndex.size(); i++)
         {
-            glm::vec3 vertex = tempVertices[vertexIndex[i] - 1];
-            glm::vec2 uv = tempUVs[uvIndex[i] - 1];
+            glm::vec3 vertex = tempVertices[vertexIndex[i]];
+            glm::vec2 uv = tempUVs[uvIndex[i]];
 
             Vertex2 meshVertex;
             meshVertex.position = vertex;
@@ -111,11 +112,13 @@ void MeshObject::LoadBuffers()
 {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ibo);
+    //glGenBuffers(1, &ibo);
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex2), &vertices[0], GL_STATIC_DRAW);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)0);
@@ -124,8 +127,5 @@ void MeshObject::LoadBuffers()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)(3 * sizeof(GLfloat)));
 
     glBindVertexArray(0);
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 }
 
