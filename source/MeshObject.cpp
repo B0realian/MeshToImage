@@ -85,6 +85,8 @@ bool MeshObject::LoadObj(const std::string filename)
             vertices.push_back(meshVertex);
         }
 
+        triangles = vertexIndex.size() / 3;
+
         LoadBuffers();
         return (bLoaded = true);
     }

@@ -21,6 +21,7 @@ public:
 	void DrawElements();
 	void DrawTriangles();
 
+	int triangles = 0;
 
 private:
 	void LoadBuffers();

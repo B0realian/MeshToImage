@@ -45,6 +45,7 @@ glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
 glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 20.f);
 
 bool Init();
+void SetTitle();
 void CompileShaders(const std::string vsName, const std::string fsName);
 std::string ShaderToString(const std::string& filename);
 void ShaderCompilationCheck(unsigned int shader, int type);
@@ -66,6 +67,7 @@ int main()
 
 	mesh.LoadObj(objFile);
 	texture.LoadTexture(texFile, true);
+	SetTitle();
 
 	CompileShaders(vShaderName, fShaderName);
 
@@ -130,6 +132,13 @@ bool Init()
 	glEnable(GL_DEPTH_TEST);
 
 	return true;
+}
+
+void SetTitle()
+{
+	std::ostringstream outs;
+	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
+	glfwSetWindowTitle(mainWindow, outs.str().c_str());
 }
 
 void CompileShaders(const std::string vsName, const std::string fsName)
