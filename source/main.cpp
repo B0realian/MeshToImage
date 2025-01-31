@@ -45,6 +45,9 @@ glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
 glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 20.f);
 bool bOrthographic = false;
 
+GLubyte* capturedColor;
+GLubyte* capturedDepth;
+
 bool Init();
 void SetTitle();
 void CompileShaders(const std::string vsName, const std::string fsName);
@@ -53,7 +56,7 @@ void ShaderCompilationCheck(unsigned int shader, int type);
 void SetUniform(const char* name, float& variable);
 void SetUniform(const char* name, glm::mat4& matrix);
 void MoveCamera(float dYaw, float dPitch);
-void CameraProjection(glm::mat4& view, glm::mat4& projection);
+void CameraProjection(glm::mat4& model, glm::mat4& view, glm::mat4& projection);
 void OnFrameBufferSize(GLFWwindow* window, int width, int height);
 void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode);
 void OnMouseMove(GLFWwindow* window, double posX, double posY);
@@ -78,8 +81,7 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glm::mat4 model(1.f), view(1.f), projection(1.f);
 		MoveCamera(camYaw, camPitch);
-		model = glm::translate(model, subjectPos);
-		CameraProjection(view, projection);
+		CameraProjection(model, view, projection);
 
 		texture.Bind();
 
@@ -176,7 +178,6 @@ std::string ShaderToString(const std::string& filename)
 		file.open(filename, std::ios::in);
 		if (!file.fail())
 			ss << file.rdbuf();
-
 		file.close();
 	}
 	catch (std::exception err)
@@ -265,19 +266,15 @@ void MoveCamera(float dYaw, float dPitch)
 	camPosition.z = subjectPos.z + camRadius * cosf(pitchR) * cosf(yawR);
 }
 
-void CameraProjection(glm::mat4 &view, glm::mat4& projection)
+void CameraProjection(glm::mat4& model, glm::mat4 &view, glm::mat4& projection)
 {
-	if (bOrthographic)
-	{
-		projection = glm::ortho(-10.f, 10.f, -5.f, 5.f, 0.1f, 100.f);
-		view = glm::translate(glm::mat4(1.f), -camPosition);
-	}
-	else
-	{
-		view = glm::lookAt(camPosition, subjectPos, camUp);
-		projection = glm::perspective(glm::radians(45.f), (float)mainWindowWidth / (float)mainWindowHeight, 0.1f, 100.f);
-	}
+	model = glm::translate(model, subjectPos);
+	view = glm::lookAt(camPosition, subjectPos, camUp);
 
+	if (bOrthographic)
+		projection = glm::ortho(-10.f, 10.f, -5.f, 5.f, 0.1f, 100.f);
+	else
+		projection = glm::perspective(glm::radians(45.f), (float)mainWindowWidth / (float)mainWindowHeight, 0.1f, 100.f);
 }
 
 void OnFrameBufferSize(GLFWwindow* window, int width, int height)
@@ -303,6 +300,13 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 	if (key == GLFW_KEY_O && action == GLFW_PRESS)
 		bOrthographic = !bOrthographic;
 	
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+	{
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, capturedColor);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH, GL_UNSIGNED_BYTE, capturedDepth);
+
+		// Code for creating image?
+	}
 }
 
 void OnMouseMove(GLFWwindow* window, double posX, double posY)
