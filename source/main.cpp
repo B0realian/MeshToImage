@@ -45,8 +45,7 @@ glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
 glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 20.f);
 bool bOrthographic = false;
 
-GLubyte* capturedColor;
-GLubyte* capturedDepth;
+
 
 bool Init();
 void SetTitle();
@@ -272,7 +271,7 @@ void CameraProjection(glm::mat4& model, glm::mat4 &view, glm::mat4& projection)
 	view = glm::lookAt(camPosition, subjectPos, camUp);
 
 	if (bOrthographic)
-		projection = glm::ortho(-10.f, 10.f, -5.f, 5.f, 0.1f, 100.f);
+		projection = glm::ortho(-2.f, 2.f, -1.f, 1.f, 0.01f, 10.f);
 	else
 		projection = glm::perspective(glm::radians(45.f), (float)mainWindowWidth / (float)mainWindowHeight, 0.1f, 100.f);
 }
@@ -302,10 +301,29 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 	
 	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 	{
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, capturedColor);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH, GL_UNSIGNED_BYTE, capturedDepth);
+		GLubyte* capturedColor = new GLubyte[1920 * 1080 * 3];
+		GLfloat* capturedDepth = new GLfloat[1920 * 1080];
+
+		glReadPixels(0, 0, 1920, 1080, GL_RGB, GL_UNSIGNED_BYTE, capturedColor);
+		glReadPixels(0, 0, 1920, 1080, GL_DEPTH_COMPONENT, GL_FLOAT, capturedDepth);
+
+		std::stringstream s;
+		std::ofstream testStream;
+		testStream.open("logs/captures.log");
+		for (int i = 0; i < 1920 * 1080; i++)
+		{
+
+			testStream << s.str() << (int)(255 * capturedDepth[i]) << " ";
+			if (i % 20 == 0)
+				testStream << std::endl;
+		}
+	
+			testStream.close();
 
 		// Code for creating image?
+
+		delete[] capturedColor;
+		delete[] capturedDepth;
 	}
 }
 
