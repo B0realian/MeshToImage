@@ -17,7 +17,9 @@ GLFWwindow* mainWindow = NULL;
 const std::string mainWindowTitle = "Mesh to Image";
 int mainWindowHeight = 1080;
 int mainWindowWidth = 1920;
+float aspectRatio = (float)mainWindowHeight / (float)mainWindowWidth;
 glm::vec3 backgroundColor = glm::vec3(0.f, 0.f, 0.05f);
+int captures = 0;
 
 GLuint shaderProgram = 0;
 const int SHADER = 0;
@@ -34,18 +36,18 @@ std::string testObj = "objects/testObject.obj";
 std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
 
+glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);
+glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
+glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 10.f);
+glm::vec3 subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 float camYaw = 0.f;
 float camPitch = 0.f;
 float camRadius = 10.f;
 float yawR;
 float pitchR;
 float fov = 45.f;
-glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);
-glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
-glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 20.f);
+float orthoZoom = 5.f;
 bool bOrthographic = false;
-
-
 
 bool Init();
 void SetTitle();
@@ -65,7 +67,7 @@ bool MainArguments(int args, std::vector<std::string> arg);
 int main()
 {
 	// MainArguments handling
-
+	
 	if (!Init())
 		return -1;
 
@@ -118,6 +120,7 @@ bool Init()
 	}
 
 	glfwMakeContextCurrent(mainWindow);
+	glfwSetWindowSizeCallback(mainWindow, OnFrameBufferSize);
 	glfwSetKeyCallback(mainWindow, OnKeyDown);
 	glfwSetCursorPosCallback(mainWindow, OnMouseMove);
 
@@ -268,18 +271,20 @@ void MoveCamera(float dYaw, float dPitch)
 void CameraProjection(glm::mat4& model, glm::mat4 &view, glm::mat4& projection)
 {
 	model = glm::translate(model, subjectPos);
-	view = glm::lookAt(camPosition, subjectPos, camUp);
+	view = glm::lookAt(camPosition, subjectPos + subjectOffset, camUp);
 
 	if (bOrthographic)
-		projection = glm::ortho(-2.f, 2.f, -1.f, 1.f, 0.01f, 10.f);
+		projection = glm::ortho(-orthoZoom, orthoZoom, -orthoZoom * aspectRatio, orthoZoom * aspectRatio, 0.01f, 20.f);
 	else
 		projection = glm::perspective(glm::radians(45.f), (float)mainWindowWidth / (float)mainWindowHeight, 0.1f, 100.f);
+	
 }
 
 void OnFrameBufferSize(GLFWwindow* window, int width, int height)
 {
 	mainWindowWidth = width;
 	mainWindowHeight = height;
+	aspectRatio = (float)mainWindowHeight / (float)mainWindowWidth;
 	glViewport(0, 0, mainWindowWidth, mainWindowHeight);
 }
 
@@ -287,7 +292,7 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+	if (key == GLFW_KEY_V && action == GLFW_PRESS)
 	{
 		bWireFrameMode = !bWireFrameMode;
 		if (bWireFrameMode)
@@ -296,34 +301,53 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	if (key == GLFW_KEY_O && action == GLFW_PRESS)
-		bOrthographic = !bOrthographic;
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+	{
+		if (!bOrthographic)
+			bOrthographic = true;
+		else
+		{
+			bOrthographic = false;
+			orthoZoom = 5.f;
+			subjectOffset = glm::vec3(0.f, 0.f, 0.f);
+		}
+	}
+	if (key == GLFW_KEY_E && action == GLFW_PRESS)
+		orthoZoom--;
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+		orthoZoom++;
+	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		subjectOffset.y -= 0.25f;
+	if (key == GLFW_KEY_S && action == GLFW_PRESS)
+		subjectOffset.y += 0.25f;
+	if (key == GLFW_KEY_A && action == GLFW_PRESS)
+		subjectOffset.x += 0.25f;
+	if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		subjectOffset.x -= 0.25f;
 	
 	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 	{
-		GLubyte* capturedColor = new GLubyte[1920 * 1080 * 3];
+		/*GLubyte* capturedColor = new GLubyte[1920 * 1080 * 3];
 		GLfloat* capturedDepth = new GLfloat[1920 * 1080];
 
-		glReadPixels(0, 0, 1920, 1080, GL_RGB, GL_UNSIGNED_BYTE, capturedColor);
-		glReadPixels(0, 0, 1920, 1080, GL_DEPTH_COMPONENT, GL_FLOAT, capturedDepth);
+		glReadPixels(0, 0, mainWindowWidth, mainWindowHeight, GL_RGB, GL_UNSIGNED_BYTE, capturedColor);
+		glReadPixels(0, 0, mainWindowWidth, mainWindowHeight, GL_DEPTH_COMPONENT, GL_FLOAT, capturedDepth);
 
 		std::stringstream s;
-		std::ofstream testStream;
-		testStream.open("logs/captures.log");
+		std::ofstream colorStream;
+		colorStream.open("logs/objtexture%i.log", captures);
 		for (int i = 0; i < 1920 * 1080; i++)
 		{
 
-			testStream << s.str() << (int)(255 * capturedDepth[i]) << " ";
+			colorStream << s.str() << (int)(255 * capturedDepth[i]) << " ";
 			if (i % 20 == 0)
-				testStream << std::endl;
+				colorStream << std::endl;
 		}
 	
-			testStream.close();
+		colorStream.close();*/
 
-		// Code for creating image?
-
-		delete[] capturedColor;
-		delete[] capturedDepth;
+		texture.SaveTGA(mainWindowWidth, mainWindowHeight, captures);
+		captures++;
 	}
 }
 
