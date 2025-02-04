@@ -3,24 +3,31 @@
 #include "glew.h"
 #include <string>
 
-struct UncompTGAHeader
+struct Raw_RGB_TGA_Header
 {
-	GLubyte one = 0;
-	GLubyte two = 0;
+	GLubyte nil01 = 0;
+	GLubyte nil02 = 0;
 	GLubyte compression = 2;
-	GLubyte four = 0;
-	GLubyte five = 0;
-	GLubyte six = 0;
-	GLubyte seven = 0;
-	GLubyte eight = 0;
-	GLubyte nine = 0;
-	GLubyte ten = 0;
-	GLubyte eleven = 0;
-	GLubyte twelve = 0;
+	GLubyte nil04 = 0;
+	GLubyte nil05 = 0;
+	GLubyte nil06= 0;
+	GLubyte nil07 = 0;
+	GLubyte nil08 = 0;
+	GLubyte nil09 = 0;
+	GLubyte nil10 = 0;
+	GLubyte nil11 = 0;
+	GLubyte nil12 = 0;
 	GLushort width = 0;
 	GLushort height = 0;
 	GLubyte bits = 24;
-	GLubyte eighteen = 0;
+	GLubyte nil18 = 0;
+};
+
+struct Raw_16bit_PGM_Header
+{
+	std::string type = "P2\n";
+	std::string size;
+	std::string maxValue = "65535\n";
 };
 
 class Texture
@@ -31,11 +38,11 @@ public:
 	bool LoadTexture(const std::string& filename, bool generateMipMaps = true);
 	void Bind(GLuint texUnit = 0);
 	void Unbind(GLuint texUnit = 0);
-	void SaveTGA(int width, int height, int fileNum);
+	void SaveCaptures(int width, int height, int fileNum);
 	
 
 private:
 	GLuint texture;
-	UncompTGAHeader tgaHeader; // [18] {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0};
-	GLushort gsh;
+	Raw_RGB_TGA_Header tgaHeader;
+	Raw_16bit_PGM_Header pgmHeader;
 };

@@ -327,26 +327,7 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 	
 	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 	{
-		/*GLubyte* capturedColor = new GLubyte[1920 * 1080 * 3];
-		GLfloat* capturedDepth = new GLfloat[1920 * 1080];
-
-		glReadPixels(0, 0, mainWindowWidth, mainWindowHeight, GL_RGB, GL_UNSIGNED_BYTE, capturedColor);
-		glReadPixels(0, 0, mainWindowWidth, mainWindowHeight, GL_DEPTH_COMPONENT, GL_FLOAT, capturedDepth);
-
-		std::stringstream s;
-		std::ofstream colorStream;
-		colorStream.open("logs/objtexture%i.log", captures);
-		for (int i = 0; i < 1920 * 1080; i++)
-		{
-
-			colorStream << s.str() << (int)(255 * capturedDepth[i]) << " ";
-			if (i % 20 == 0)
-				colorStream << std::endl;
-		}
-	
-		colorStream.close();*/
-
-		texture.SaveTGA(mainWindowWidth, mainWindowHeight, captures);
+		texture.SaveCaptures(mainWindowWidth, mainWindowHeight, captures);
 		captures++;
 	}
 }

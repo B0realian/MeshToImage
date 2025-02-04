@@ -1,6 +1,7 @@
 #include "Texture.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb/stb_image.h"
+#include <format>
 #include <iostream>
 #include <fstream>
 
@@ -54,41 +55,51 @@ void Texture::Unbind(GLuint texUnit)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::SaveTGA(int width, int height, int fileNum)
+void Texture::SaveCaptures(int width, int height, int fileNum)
 {
 	tgaHeader.width = width;
 	tgaHeader.height = height;
-	GLubyte* capturedColor = new GLubyte[width * height * 3];
+	pgmHeader.size = std::format("{} {}\n", width, height);
+	std::string RGB_Filename = std::format("logs/Texture{}.tga", fileNum);
+	std::string GM_Filename = std::format("logs/HeightMap{}.pgm", fileNum);
+	GLfloat* capturedColor = new GLfloat[width * height * 3];
 	GLfloat* capturedDepth = new GLfloat[width * height];
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, capturedColor);
+	glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, capturedColor);
 	glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, capturedDepth);
 
-	std::ofstream colFile("logs/objTexture.tga", fileNum, std::ios::binary);
-	if (!colFile.is_open())
+	std::ofstream colFile(RGB_Filename, std::ios::binary);
+	if (colFile.is_open())
 	{
-		std::cout << "Failed to save images." << std::endl;
-		return;
-	}
-	colFile.write((char*)&tgaHeader, sizeof(UncompTGAHeader));
-	colFile.write((char*)capturedColor, (width * height * 3));
-	colFile.close();
-
-	std::ofstream heightFile("logs/objHeightMap.tga", fileNum, std::ios::binary);
-	if (!heightFile.is_open())
-	{
-		std::cout << "Failed to save images." << std::endl;
-		return;
-	}
-	heightFile.write((char*)&tgaHeader, sizeof(UncompTGAHeader));
-	for (int i = 0; i < width * height; i++)
-	{
-		GLubyte tempByte = (GLubyte)(-255 * capturedDepth[i]) + 255;
-		for (int j = 0; j < 3; j++)
+		colFile.write((char*)&tgaHeader, sizeof(Raw_RGB_TGA_Header));
+		for (int i = 0; i < width * height * 3; i++)
 		{
-			heightFile.write((char*)&tempByte, sizeof(GLubyte));
+			GLubyte tempValue;
+			tempValue = static_cast<GLubyte>(255 * capturedColor[i]);
+
+			colFile.write((char*)&tempValue, 1);
 		}
+		colFile.close();
 	}
-	heightFile.close();
+	else
+		std::cout << "Failed to save RGB-data." << std::endl;
+
+	std::ofstream heightFile(GM_Filename);
+	if (heightFile.is_open())
+	{
+		heightFile << pgmHeader.type << pgmHeader.size << pgmHeader.maxValue;
+		for (int i = (width * height) - width; i > -1; i -= width)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				GLushort tempValue = static_cast<GLushort>((-65535 * capturedDepth[j+i]) + 65535);
+				heightFile << tempValue << "\n";
+			}
+		}
+		heightFile.close();
+	}
+	else
+		std::cout << "Failed to save height-data." << std::endl;
+	
 	delete[] capturedColor;
 	delete[] capturedDepth;
 }
