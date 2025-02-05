@@ -71,12 +71,14 @@ void Texture::SaveCaptures(int width, int height, int fileNum)
 	if (colFile.is_open())
 	{
 		colFile.write((char*)&tgaHeader, sizeof(Raw_RGB_TGA_Header));
-		for (int i = 0; i < width * height * 3; i++)
+		for (int i = 0; i < width * height * 3; i += 3)
 		{
-			GLubyte tempValue;
-			tempValue = static_cast<GLubyte>(255 * capturedColor[i]);
-
-			colFile.write((char*)&tempValue, 1);
+			GLubyte tempR = static_cast<GLubyte>(255 * capturedColor[i + 2]);
+			GLubyte tempG = static_cast<GLubyte>(255 * capturedColor[i + 1]);
+			GLubyte tempB = static_cast<GLubyte>(255 * capturedColor[i]);
+			colFile.write((char*)&tempR, 1);
+			colFile.write((char*)&tempG, 1);
+			colFile.write((char*)&tempB, 1);
 		}
 		colFile.close();
 	}
