@@ -40,6 +40,7 @@ glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);
 glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
 glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 10.f);
 glm::vec3 subjectOffset = glm::vec3(0.f, 0.f, 0.f);
+glm::vec2 drawOffset = glm::vec2(0.f, 0.f);
 float camYaw = 0.f;
 float camPitch = 0.f;
 float camRadius = 10.f;
@@ -276,15 +277,14 @@ void CameraProjection(glm::mat4& model, glm::mat4 &view, glm::mat4& projection)
 	if (bOrthographic)
 		projection = glm::ortho(-orthoZoom, orthoZoom, -orthoZoom * aspectRatio, orthoZoom * aspectRatio, 0.01f, 20.f);
 	else
-		projection = glm::perspective(glm::radians(45.f), (float)mainWindowWidth / (float)mainWindowHeight, 0.1f, 100.f);
-	
+		projection = glm::perspective(glm::radians(45.f), (1.f / aspectRatio), 0.1f, 100.f);
 }
 
 void OnFrameBufferSize(GLFWwindow* window, int width, int height)
 {
 	mainWindowWidth = width;
 	mainWindowHeight = height;
-	aspectRatio = (float)mainWindowHeight / (float)mainWindowWidth;
+	aspectRatio = static_cast<float>(mainWindowHeight) / static_cast<float>(mainWindowWidth);
 	glViewport(0, 0, mainWindowWidth, mainWindowHeight);
 }
 
@@ -299,8 +299,14 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		return;
 	}
-
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+	{
+		texture.SaveCaptures(mainWindowWidth, mainWindowHeight, captures);
+		captures++;
+		return;
+	}
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 	{
 		if (!bOrthographic)
@@ -311,25 +317,21 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 			orthoZoom = 5.f;
 			subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 		}
+		return;
 	}
-	if (key == GLFW_KEY_E && action == GLFW_PRESS)
-		orthoZoom--;
-	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
-		orthoZoom++;
-	if (key == GLFW_KEY_W && action == GLFW_PRESS)
-		subjectOffset.y -= 0.25f;
-	if (key == GLFW_KEY_S && action == GLFW_PRESS)
-		subjectOffset.y += 0.25f;
-	if (key == GLFW_KEY_A && action == GLFW_PRESS)
-		subjectOffset.x += 0.25f;
-	if (key == GLFW_KEY_D && action == GLFW_PRESS)
-		subjectOffset.x -= 0.25f;
-	
-	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
-	{
-		texture.SaveCaptures(mainWindowWidth, mainWindowHeight, captures);
-		captures++;
-	}
+
+	if (key == GLFW_KEY_E)
+		orthoZoom -= 0.25f;
+	if (key == GLFW_KEY_Q)
+		orthoZoom += 0.25f;
+	if (key == GLFW_KEY_W)
+		subjectOffset.y -= 0.1f;
+	if (key == GLFW_KEY_S)
+		subjectOffset.y += 0.1f;
+	if (key == GLFW_KEY_A)
+		subjectOffset.x += 0.1f;
+	if (key == GLFW_KEY_D)
+		subjectOffset.x -= 0.1f;
 }
 
 void OnMouseMove(GLFWwindow* window, double posX, double posY)
