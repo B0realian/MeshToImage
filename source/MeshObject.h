@@ -1,10 +1,10 @@
 #pragma once
 #define GLEW_STATIC
 #include "glew.h"
-#include "../glm/glm.hpp"
+#include "../libs/glm/glm.hpp"
+#include <fbxsdk.h>
 #include <vector>
 #include <string>
-
 
 struct Vertex2
 {
@@ -18,6 +18,7 @@ public:
 	MeshObject();
 	~MeshObject();
 	bool LoadObj(const std::string filename);
+	bool LoadMesh(const std::string filename);
 	void DrawElements();
 	void DrawTriangles();
 

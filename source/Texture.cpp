@@ -1,9 +1,11 @@
 #include "Texture.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "../stb/stb_image.h"
+#include "../libs/stb/stb_image.h"
+//#include "../libs/tt/tinytiffwriter.h"
 #include <format>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 Texture::Texture()
 {
@@ -104,4 +106,30 @@ void Texture::SaveCaptures(int width, int height, int fileNum)
 	
 	delete[] capturedColor;
 	delete[] capturedDepth;
+}
+
+void Texture::SaveTiff(int width, int height, int fileNum)
+{
+	std::string tif_Filename = std::format("logs/Texture{}.tif", fileNum);
+	GLfloat* capturedColor = new GLfloat[width * height * 3];
+	GLfloat* capturedDepth = new GLfloat[width * height];
+	glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, capturedColor);
+	glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, capturedDepth);
+	GLushort* RGBA_Data = new GLushort[width * height * 4];
+
+	for (int i = 0, c = 0, d = 0; i < width * height * 4; i += 4)
+	{
+		RGBA_Data[i] = static_cast<GLushort>(-65535 * capturedColor[c] + 65535);
+		RGBA_Data[i + 1] = static_cast<GLushort>(-65535 * capturedColor[c + 1] + 65535);
+		RGBA_Data[i + 2] = static_cast<GLushort>(-65535 * capturedColor[c + 2] + 65535);
+		RGBA_Data[i + 3] = static_cast<GLushort>(-65535 * capturedDepth[d] + 65535);
+		c += 3;
+		d++;
+	}
+
+	// Actual saving as tif code
+
+	delete[] capturedColor;
+	delete[] capturedDepth;
+	delete[] RGBA_Data;
 }

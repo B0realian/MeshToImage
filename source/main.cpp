@@ -1,8 +1,8 @@
 #define GLEW_STATIC
 #include "glew.h"
 #include <GLFW/glfw3.h>
-#include "../glm/gtc/matrix_transform.hpp"
-#include "../glm/gtc/type_ptr.hpp"
+#include "../libs/glm/gtc/matrix_transform.hpp"
+#include "../libs/glm/gtc/type_ptr.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -40,7 +40,6 @@ glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);
 glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
 glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 10.f);
 glm::vec3 subjectOffset = glm::vec3(0.f, 0.f, 0.f);
-glm::vec2 drawOffset = glm::vec2(0.f, 0.f);
 float camYaw = 0.f;
 float camPitch = 0.f;
 float camRadius = 10.f;
@@ -48,6 +47,7 @@ float yawR;
 float pitchR;
 float fov = 45.f;
 float orthoZoom = 5.f;
+float orthoFar = 10.f;
 bool bOrthographic = false;
 
 bool Init();
@@ -275,7 +275,7 @@ void CameraProjection(glm::mat4& model, glm::mat4 &view, glm::mat4& projection)
 	view = glm::lookAt(camPosition, subjectPos + subjectOffset, camUp);
 
 	if (bOrthographic)
-		projection = glm::ortho(-orthoZoom, orthoZoom, -orthoZoom * aspectRatio, orthoZoom * aspectRatio, 0.01f, 20.f);
+		projection = glm::ortho(-orthoZoom, orthoZoom, -orthoZoom * aspectRatio, orthoZoom * aspectRatio, 0.01f, orthoFar);
 	else
 		projection = glm::perspective(glm::radians(45.f), (1.f / aspectRatio), 0.1f, 100.f);
 }
@@ -315,23 +315,28 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 		{
 			bOrthographic = false;
 			orthoZoom = 5.f;
+			orthoFar = 10.f;
 			subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 		}
 		return;
 	}
 
-	if (key == GLFW_KEY_E)
+	else if (key == GLFW_KEY_E && bOrthographic)
 		orthoZoom -= 0.25f;
-	if (key == GLFW_KEY_Q)
+	else if (key == GLFW_KEY_Q && bOrthographic)
 		orthoZoom += 0.25f;
-	if (key == GLFW_KEY_W)
+	else if (key == GLFW_KEY_W && bOrthographic)
 		subjectOffset.y -= 0.1f;
-	if (key == GLFW_KEY_S)
+	else if (key == GLFW_KEY_S && bOrthographic)
 		subjectOffset.y += 0.1f;
-	if (key == GLFW_KEY_A)
+	else if (key == GLFW_KEY_A && bOrthographic)
 		subjectOffset.x += 0.1f;
-	if (key == GLFW_KEY_D)
+	else if (key == GLFW_KEY_D && bOrthographic)
 		subjectOffset.x -= 0.1f;
+	else if (key == GLFW_KEY_Z && bOrthographic)
+		orthoFar -= 0.05f;
+	else if (key == GLFW_KEY_X && bOrthographic)
+		orthoFar += 0.05f;
 }
 
 void OnMouseMove(GLFWwindow* window, double posX, double posY)
