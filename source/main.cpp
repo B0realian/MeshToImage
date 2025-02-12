@@ -31,7 +31,7 @@ std::string fShaderName = "shaders/texture.frag";
 
 MeshObject mesh;
 Texture texture;
-std::string objFile = "objects/mega.obj";
+std::string meshFile = "objects/mega.obj";
 std::string testObj = "objects/testObject.obj";
 std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
@@ -72,7 +72,7 @@ int main()
 	if (!Init())
 		return -1;
 
-	mesh.LoadObj(objFile);
+	mesh.LoadMesh(meshFile);
 	texture.LoadTexture(texFile, true);
 	SetTitle();
 

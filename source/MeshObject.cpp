@@ -2,7 +2,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <iomanip>
 
 
 MeshObject::MeshObject()
@@ -17,7 +16,7 @@ MeshObject::~MeshObject()
 	glDeleteBuffers(1, &ibo);
 }
 
-bool MeshObject::LoadObj(const std::string filename)
+bool MeshObject::LoadMesh(const std::string filename)
 {
     std::vector<unsigned int> vertexIndex, uvIndex;
     std::vector<glm::vec3> tempVertices;
