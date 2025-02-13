@@ -96,7 +96,7 @@ int main()
 		SetUniform("view", view);
 		SetUniform("projection", projection);
 
-		mesh.DrawTriangles();
+		fbx.DrawTriangles();
 
 		glfwSwapBuffers(mainWindow);
 		glfwPollEvents();

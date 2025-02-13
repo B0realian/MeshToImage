@@ -117,13 +117,16 @@ bool MeshFBX::LoadMesh(const std::string filename)
 					glm::vec3 vertex = tempVertices[vertexIndex[n]];
 					glm::vec2 uv = tempUVs[uvIndex[n]];
 
+					std::cout << "Vertex " << n << ": " << vertex.x << ", " << vertex.y << ", " << vertex.z << ", UV: " << uv.x << ", " << uv.y << std::endl;
+
 					Vertex2 meshVertex;
 					meshVertex.position = vertex;
 					meshVertex.texCoords = uv;
 					vertices.push_back(meshVertex);
 				}
 
-				triangles = vertexIndex.size() / 3;
+				std::cout << "Vector of Vertex struct length: " << vertices.size() << std::endl;
+				triangles = vertices.size() / 3;
 
 				LoadBuffers();
 				return (bLoaded = true);	// This causees only one mesh to be loaded from the fbx. Should be alright for this project?
