@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "MeshFBX.h"
 #include "MeshObject.h"
 #include "Texture.h"
 
@@ -30,9 +31,11 @@ std::string vShaderName = "shaders/texOrbCam.vert";
 std::string fShaderName = "shaders/texture.frag";
 
 MeshObject mesh;
+
 Texture texture;
 std::string meshFile = "objects/mega.obj";
-std::string testObj = "objects/testObject.obj";
+std::string testObj = "objects/blendCube.obj";
+std::string fbxFile = "objects/testFBX.fbx";
 std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
 
@@ -71,8 +74,9 @@ int main()
 	
 	if (!Init())
 		return -1;
-
-	mesh.LoadMesh(meshFile);
+	MeshFBX fbx;
+	//mesh.LoadMesh(testObj);
+	fbx.LoadMesh(fbxFile);
 	texture.LoadTexture(texFile, true);
 	SetTitle();
 

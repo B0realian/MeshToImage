@@ -5,12 +5,8 @@
 #include <fbxsdk.h>
 #include <vector>
 #include <string>
+#include "VertexN.h"
 
-struct Vertex2
-{
-	glm::vec3 position;
-	glm::vec2 texCoords;
-};
 
 class MeshFBX
 {
@@ -23,7 +19,6 @@ public:
 	int triangles = 0;
 
 private:
-	void GetFbxInfo(FbxNode* node);
 	void LoadBuffers();
 
 	FbxManager* manager;

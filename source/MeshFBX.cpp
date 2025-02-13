@@ -4,6 +4,15 @@
 #include <fstream>
 #include <iomanip>
 
+#if _DEBUG
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-md.lib")
+#else
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-md.lib")
+#endif
 
 MeshFBX::MeshFBX()
 {
@@ -29,11 +38,13 @@ bool MeshFBX::LoadMesh(const std::string filename)
 
 	if (node)
 	{
+		std::cout << "Root node found.\n";
+
 		int childrenAmount = node->GetChildCount();
 		FbxNode* childNode = 0;
 		std::vector<glm::vec3> tempVertices;
 		std::vector<glm::vec2> tempUVs;
-		std::vector<unsigned int> tempVertIndex, tempUVIndex;
+		std::vector<unsigned int> vertexIndex, uvIndex;
 
 		for (int i = 0; i < childrenAmount; i++)
 		{
@@ -42,23 +53,29 @@ bool MeshFBX::LoadMesh(const std::string filename)
 
 			if (mesh != NULL)
 			{
-				FbxVector4* vertices = mesh->GetControlPoints();
+				std::cout << "Mesh found in child node " << i << std::endl;
+
+				FbxVector4* verticeArr = mesh->GetControlPoints();
 				FbxGeometryElementUV* elementUV = mesh->GetElementUV(0);		// Banking on the main texture being layer 0
+				int currentVertexIndex = 0;
+				int currentUVIndex = 0;
 
 				for (int controlPoints = 0; controlPoints < mesh->GetControlPointsCount(); controlPoints++)
 				{
-					glm::vec3 vert = glm::vec3(vertices[controlPoints].mData[0], vertices[controlPoints].mData[1], vertices[controlPoints].mData[2]);
+					glm::vec3 vert = glm::vec3(verticeArr[controlPoints].mData[0], verticeArr[controlPoints].mData[1], verticeArr[controlPoints].mData[2]);
 					tempVertices.push_back(vert);
 				}
+
+				std::cout << "Number of unique vertices in mesh: " << tempVertices.size() << std::endl;
 
 				for (int polygon = 0; polygon < mesh->GetPolygonCount(); polygon++)
 				{
 					for (int posInPolygon = 0; posInPolygon < mesh->GetPolygonSize(polygon); posInPolygon++)
 					{
-						int vertIndex = mesh->GetPolygonVertex(polygon, posInPolygon);
-						int uvIndex = mesh->GetTextureUVIndex(polygon, posInPolygon);
-						tempVertIndex.push_back(vertIndex);
-						tempUVIndex.push_back(uvIndex);
+						currentVertexIndex = mesh->GetPolygonVertex(polygon, posInPolygon);
+						currentUVIndex = mesh->GetTextureUVIndex(polygon, posInPolygon);
+						vertexIndex.push_back(currentVertexIndex);
+						uvIndex.push_back(currentUVIndex);
 
 						FbxVector2 uvCoord{ 0, 0 };
 
@@ -68,11 +85,11 @@ bool MeshFBX::LoadMesh(const std::string filename)
 							switch (elementUV->GetReferenceMode())
 							{
 							case FbxGeometryElement::eDirect:
-								uvCoord = elementUV->GetDirectArray().GetAt(vertIndex);
+								uvCoord = elementUV->GetDirectArray().GetAt(currentVertexIndex);
 								tempUVs.push_back(glm::vec2(uvCoord.mData[0], uvCoord.mData[1]));
 								break;
 							case FbxGeometryElement::eIndexToDirect:
-								uvCoord = elementUV->GetDirectArray().GetAt(elementUV->GetIndexArray().GetAt(vertIndex));
+								uvCoord = elementUV->GetDirectArray().GetAt(elementUV->GetIndexArray().GetAt(currentVertexIndex));
 								tempUVs.push_back(glm::vec2(uvCoord.mData[0], uvCoord.mData[1]));
 								break;
 							default:
@@ -81,7 +98,7 @@ bool MeshFBX::LoadMesh(const std::string filename)
 							}
 							break;
 						case FbxGeometryElement::eByPolygonVertex:
-							uvCoord = elementUV->GetDirectArray().GetAt(uvIndex);
+							uvCoord = elementUV->GetDirectArray().GetAt(currentUVIndex);
 							tempUVs.push_back(glm::vec2(uvCoord.mData[0], uvCoord.mData[1]));
 							break;
 						default:
@@ -91,14 +108,27 @@ bool MeshFBX::LoadMesh(const std::string filename)
 					}
 				}
 
-				// Convert to Vertex2 vector
+				std::cout << "Number of unique uv coordinates: " << tempUVs.size() << std::endl;
+				std::cout << "Number of vertex indices: " << vertexIndex.size() << std::endl;
+				std::cout << "Number of uv indices: " << uvIndex.size() << std::endl;
 
-				// LoadBuffers();
-				return (bLoaded = false);	// Change to true when function is finished		// This causees only one mesh to be loaded from the fbx. Should be alright for this project?
+				for (int n = 0; n < vertexIndex.size(); n++)
+				{
+					glm::vec3 vertex = tempVertices[vertexIndex[n]];
+					glm::vec2 uv = tempUVs[uvIndex[n]];
+
+					Vertex2 meshVertex;
+					meshVertex.position = vertex;
+					meshVertex.texCoords = uv;
+					vertices.push_back(meshVertex);
+				}
+
+				triangles = vertexIndex.size() / 3;
+
+				LoadBuffers();
+				return (bLoaded = true);	// This causees only one mesh to be loaded from the fbx. Should be alright for this project?
 			}
-
 		}
-
 	}
 	return false;
 }

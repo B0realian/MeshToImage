@@ -4,12 +4,8 @@
 #include "../libs/glm/glm.hpp"
 #include <vector>
 #include <string>
+#include "VertexN.h"
 
-struct Vertex2
-{
-	glm::vec3 position;
-	glm::vec2 texCoords;
-};
 
 class MeshObject
 {
