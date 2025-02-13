@@ -23,7 +23,9 @@ MeshFBX::MeshFBX()
 
 MeshFBX::~MeshFBX()
 {
-
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ibo);
 }
 
 bool MeshFBX::LoadMesh(const std::string filename)
@@ -115,10 +117,9 @@ bool MeshFBX::LoadMesh(const std::string filename)
 				for (int n = 0; n < vertexIndex.size(); n++)
 				{
 					glm::vec3 vertex = tempVertices[vertexIndex[n]];
-					glm::vec2 uv = tempUVs[uvIndex[n]];
-
-					std::cout << "Vertex " << n << ": " << vertex.x << ", " << vertex.y << ", " << vertex.z << ", UV: " << uv.x << ", " << uv.y << std::endl;
-
+					glm::vec2 uv = tempUVs[n];
+					vertex *= 0.01f;		// Vertice values turned out to be scaled up 100 times in my test megascan fbx
+					
 					Vertex2 meshVertex;
 					meshVertex.position = vertex;
 					meshVertex.texCoords = uv;

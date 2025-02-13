@@ -35,7 +35,7 @@ MeshObject mesh;
 Texture texture;
 std::string meshFile = "objects/mega.obj";
 std::string testObj = "objects/blendCube.obj";
-std::string fbxFile = "objects/testFBX.fbx";
+std::string fbxFile = "objects/mega.fbx";
 std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
 
