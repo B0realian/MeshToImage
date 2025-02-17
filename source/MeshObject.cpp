@@ -13,17 +13,16 @@ MeshObject::~MeshObject()
 {
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ibo);
 }
 
 bool MeshObject::LoadMesh(const std::string filename)
 {
-    std::vector<unsigned int> vertexIndex, uvIndex;
-    std::vector<glm::vec3> tempVertices;
-    std::vector<glm::vec2> tempUVs;
-
     if (filename.find(".obj") != std::string::npos)
     {
+        std::vector<unsigned int> vertexIndex, uvIndex;
+        std::vector<glm::vec3> tempVertices;
+        std::vector<glm::vec2> tempUVs;
+
         std::ifstream file(filename, std::ios::in);
         if (!file)
         {
@@ -68,7 +67,7 @@ bool MeshObject::LoadMesh(const std::string filename)
                 uvIndex.push_back(t1 - 1);
                 uvIndex.push_back(t2 - 1);
                 uvIndex.push_back(t3 - 1);
-                // Not bothering with normals at the moment
+                // Not bothering with normals
             }
         }
         file.close();

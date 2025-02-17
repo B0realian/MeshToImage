@@ -25,12 +25,10 @@ MeshFBX::~MeshFBX()
 {
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ibo);
 }
 
 bool MeshFBX::LoadMesh(const std::string filename)
 {
-	
 	FbxImporter* importer = FbxImporter::Create(manager, "");
 	importer->Initialize(filename.c_str(), -1, manager->GetIOSettings());
 	FbxScene* scene = FbxScene::Create(manager, "SceneName");
@@ -58,7 +56,7 @@ bool MeshFBX::LoadMesh(const std::string filename)
 				std::cout << "Mesh found in child node " << i << std::endl;
 
 				FbxVector4* verticeArr = mesh->GetControlPoints();
-				FbxGeometryElementUV* elementUV = mesh->GetElementUV(0);		// Banking on the main texture being layer 0
+				FbxGeometryElementUV* elementUV = mesh->GetElementUV(0);		// Banking on the main texture being layer 0, or that all textures have the same UV
 				int currentVertexIndex = 0;
 				int currentUVIndex = 0;
 
@@ -109,10 +107,6 @@ bool MeshFBX::LoadMesh(const std::string filename)
 						}
 					}
 				}
-
-				std::cout << "Number of unique uv coordinates: " << tempUVs.size() << std::endl;
-				std::cout << "Number of vertex indices: " << vertexIndex.size() << std::endl;
-				std::cout << "Number of uv indices: " << uvIndex.size() << std::endl;
 
 				for (int n = 0; n < vertexIndex.size(); n++)
 				{

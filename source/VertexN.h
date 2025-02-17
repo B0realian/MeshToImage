@@ -10,6 +10,6 @@ struct Vertex2
 struct Vertex3
 {
 	glm::vec3 position;
-	glm::vec2 texCoords;
 	glm::vec3 normals;
+	glm::vec2 texCoords;
 };

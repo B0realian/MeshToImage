@@ -24,5 +24,4 @@ private:
 	std::vector<Vertex2> vertices;
 	GLuint vao = 0;
 	GLuint vbo = 0;
-	GLuint ibo = 0;
 };

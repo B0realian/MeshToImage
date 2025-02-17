@@ -2,17 +2,18 @@
 #define GLEW_STATIC
 #include "glew.h"
 #include "../libs/glm/glm.hpp"
-#include <fbxsdk.h>
+#include "../libs/json/json.hpp"
 #include <vector>
 #include <string>
 #include "VertexN.h"
 
+using JSON = nlohmann::json;
 
-class MeshFBX
+class MeshGLTF
 {
 public:
-	MeshFBX();
-	~MeshFBX();
+	MeshGLTF();
+	~MeshGLTF();
 	bool LoadMesh(const std::string filename);
 	void DrawTriangles();
 
@@ -21,9 +22,8 @@ public:
 private:
 	void LoadBuffers();
 
-	FbxManager* manager;
-	FbxIOSettings* ioSettings;
-	
+	JSON json;
+
 	bool bLoaded = false;
 	std::vector<Vertex2> vertices;
 	GLuint vao = 0;
