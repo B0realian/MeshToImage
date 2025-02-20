@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "MeshGLTF.h"
 #include "MeshFBX.h"
 #include "MeshObject.h"
 #include "Texture.h"
@@ -36,6 +37,7 @@ Texture texture;
 std::string meshFile = "objects/mega.obj";
 std::string testObj = "objects/blendCube.obj";
 std::string fbxFile = "objects/mega.fbx";
+std::string gltfFile = "objects/test_split.gltf";
 std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
 
@@ -74,9 +76,10 @@ int main()
 	
 	if (!Init())
 		return -1;
-	MeshFBX fbx;
+	//MeshFBX fbx;
 	//mesh.LoadMesh(testObj);
-	fbx.LoadMesh(fbxFile);
+	MeshGLTF gltf;
+	gltf.LoadMesh(gltfFile);
 	texture.LoadTexture(texFile, true);
 	SetTitle();
 
@@ -96,7 +99,7 @@ int main()
 		SetUniform("view", view);
 		SetUniform("projection", projection);
 
-		fbx.DrawTriangles();
+		gltf.DrawTriangles();
 
 		glfwSwapBuffers(mainWindow);
 		glfwPollEvents();
@@ -307,7 +310,7 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mode)
 	}
 	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 	{
-		texture.SaveCaptures(mainWindowWidth, mainWindowHeight, captures);
+		texture.SaveRaw(mainWindowWidth, mainWindowHeight, captures);
 		captures++;
 		return;
 	}

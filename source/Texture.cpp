@@ -57,7 +57,7 @@ void Texture::Unbind(GLuint texUnit)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::SaveCaptures(int width, int height, int fileNum)
+void Texture::SaveRaw(int width, int height, int fileNum)
 {
 	tgaHeader.width = width;
 	tgaHeader.height = height;

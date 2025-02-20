@@ -17,7 +17,7 @@ public:
 	bool LoadMesh(const std::string filename);
 	void DrawTriangles();
 
-	int triangles = 0;
+	unsigned int triangles = 0;
 
 private:
 	void LoadBuffers();

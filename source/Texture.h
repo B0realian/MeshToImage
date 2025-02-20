@@ -38,7 +38,7 @@ public:
 	bool LoadTexture(const std::string& filename, bool generateMipMaps = true);
 	void Bind(GLuint texUnit = 0);
 	void Unbind(GLuint texUnit = 0);
-	void SaveCaptures(int width, int height, int fileNum);
+	void SaveRaw(int width, int height, int fileNum);
 	void SaveTiff(int width, int height, int fileNum);
 
 private:
