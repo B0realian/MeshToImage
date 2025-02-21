@@ -9,9 +9,8 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "MeshGLTF.h"
-#include "MeshFBX.h"
-#include "MeshObject.h"
+#include "Enums.h"
+#include "Mesh.h"
 #include "Texture.h"
 
 
@@ -31,13 +30,14 @@ bool bWireFrameMode = false;
 std::string vShaderName = "shaders/texOrbCam.vert";
 std::string fShaderName = "shaders/texture.frag";
 
-MeshObject mesh;
+EMeshType meshtype = EMeshType::FBX;
+float meshScale = 0.01f;
 
 Texture texture;
 std::string meshFile = "objects/mega.obj";
 std::string testObj = "objects/blendCube.obj";
 std::string fbxFile = "objects/mega.fbx";
-std::string gltfFile = "objects/test_split.gltf";
+std::string gltfFile = "objects/test_embedded.gltf";
 std::string texFile = "textures/mega.jpg";
 GLuint vbo, vao, ibo;
 
@@ -56,7 +56,7 @@ float orthoFar = 10.f;
 bool bOrthographic = false;
 
 bool Init();
-void SetTitle();
+void SetTitle(int triangles);
 void CompileShaders(const std::string vsName, const std::string fsName);
 std::string ShaderToString(const std::string& filename);
 void ShaderCompilationCheck(unsigned int shader, int type);
@@ -70,18 +70,22 @@ void OnMouseMove(GLFWwindow* window, double posX, double posY);
 bool MainArguments(int args, std::vector<std::string> arg);
 
 
-int main()
+int main(int argc, char* argv[])
 {
-	// MainArguments handling
+	std::vector<std::string> a;
+	for (int i = 0; i < argc; i++)
+		a.push_back(argv[i]);
+
+	if (!MainArguments(argc, a))
+		return 0;
 	
 	if (!Init())
 		return -1;
-	//MeshFBX fbx;
-	//mesh.LoadMesh(testObj);
-	MeshGLTF gltf;
-	gltf.LoadMesh(gltfFile);
+	
+	Mesh mesh;
+	mesh.LoadMesh(meshFile, meshtype);
 	texture.LoadTexture(texFile, true);
-	SetTitle();
+	SetTitle(mesh.triangles);
 
 	CompileShaders(vShaderName, fShaderName);
 
@@ -99,7 +103,7 @@ int main()
 		SetUniform("view", view);
 		SetUniform("projection", projection);
 
-		gltf.DrawTriangles();
+		mesh.DrawTriangles();
 
 		glfwSwapBuffers(mainWindow);
 		glfwPollEvents();
@@ -147,10 +151,10 @@ bool Init()
 	return true;
 }
 
-void SetTitle()
+void SetTitle(int triangles)
 {
 	std::ostringstream outs;
-	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
+	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << triangles;
 	glfwSetWindowTitle(mainWindow, outs.str().c_str());
 }
 
@@ -369,20 +373,64 @@ void OnMouseMove(GLFWwindow* window, double posX, double posY)
 
 bool MainArguments(int args, std::vector<std::string> arg)
 {
-	if (args == 1)
+	if (args <= 2)
 	{
 		std::cout << "User Manual:\n";
 		return false;
 	}
 
+	bool bMesh = false;
+	bool bTexture = false;
+
 	int i = 1;
 
 	while (i < args)
 	{
-		
+		if (arg[i] == "-m" && args > i)
+		{
+			meshFile = static_cast<std::string>(arg[i + 1]);
+			if (meshFile.find(".gltf") != std::string::npos)
+				meshtype = EMeshType::GLTF;
+			else if (meshFile.find(".obj") != std::string::npos)
+				meshtype = EMeshType::OBJ;
+			else if (meshFile.find(".fbx") != std::string::npos)
+				meshtype = EMeshType::FBX;
+			else
+			{
+				std::cout << "Unsupported mesh filetype.\n";
+				return false;
+			}
+			bMesh = true;
+			i++;
+		}
+		else if (arg[i] == "-t" && args > i)
+		{
+			texFile = static_cast<std::string>(arg[i + 1]);
+			if (texFile.find(".jpg") != std::string::npos ||
+				texFile.find(".png") != std::string::npos ||
+				texFile.find(".tga") != std::string::npos ||
+				texFile.find(".gif") != std::string::npos )
+				bTexture = true;
+			else
+			{
+				std::cout << "Unsupported texture filetype.\n";
+				return false;
+			}
+			i++;
+		}
+		else if (arg[i] == "-s" && args > i)
+		{
+			if (!(meshScale = std::stof(arg[i + 1])))
+			{
+				std::cout << "Failed to convert scale argument to float.\n";
+				return false;
+			}
+			i++;
+		}
+		std::cout << arg[i] << std::endl;
 
 		i++;
 	}
 
-	return true;
+	return (bMesh && bTexture);
 }
