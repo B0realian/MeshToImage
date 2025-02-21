@@ -427,7 +427,6 @@ bool MainArguments(int args, std::vector<std::string> arg)
 			}
 			i++;
 		}
-		std::cout << arg[i] << std::endl;
 
 		i++;
 	}

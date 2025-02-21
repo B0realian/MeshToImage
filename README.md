@@ -27,3 +27,22 @@ V to toggle wireframe mode.
 Space to toggle between orthographic and perspective.
 
 Return to take a snapshot.
+
+## Build it yourself?
+As already mentioned, libraries you need are:
+
+### OpenGL libs
+GLEW (https://glew.sourceforge.net/)
+GLFW (https://www.glfw.org/download)
+GLM (https://github.com/g-truc/glm)
+
+### Texture loading lib
+STB (https://github.com/nothings/stb)
+
+### FBX SDK
+fbxsdk (https://aps.autodesk.com/developer/overview/fbx-sdk)
+
+### JSON parser
+json.hpp (https://github.com/nlohmann/json)
+
+All of these libraries are well documented and are straightforward to include (except perhaps the fbx sdk, if you struggle with it check out https://www.youtube.com/watch?v=oIKnBVP2Jgg). 
