@@ -34,11 +34,17 @@ EMeshType meshtype = EMeshType::FBX;
 float meshScale = 0.01f;
 
 Texture texture;
-std::string meshFile = "objects/mega.obj";
-std::string testObj = "objects/blendCube.obj";
-std::string fbxFile = "objects/mega.fbx";
-std::string gltfFile = "objects/test_embedded.gltf";
-std::string texFile = "textures/mega.jpg";
+std::string meshFile = "";
+std::string texFile = "";
+
+std::string testObj = "objects/test/test.obj";
+std::string testFbx = "objects/test/test.fbx";
+std::string testGltf = "objects/test/test_split.gltf";
+std::string testGltfEmb = "objects/test/test_embedded.gltf";
+std::string testTexture = "textures/test.jpg";
+
+std::string devMFile = "objects/Mossy_Rock.gltf";
+std::string devTFile = "textures/Mossy_Rock.jpg";
 GLuint vbo, vao, ibo;
 
 glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);
@@ -79,10 +85,14 @@ int main(int argc, char* argv[])
 	if (!MainArguments(argc, a))
 		return 0;
 	
+	/*meshFile = devMFile;
+	texFile = devTFile;
+	meshtype = EMeshType::GLTF;*/
+
 	if (!Init())
 		return -1;
 	
-	Mesh mesh;
+	Mesh mesh(meshScale);
 	mesh.LoadMesh(meshFile, meshtype);
 	texture.LoadTexture(texFile, true);
 	SetTitle(mesh.triangles);
@@ -373,7 +383,7 @@ void OnMouseMove(GLFWwindow* window, double posX, double posY)
 
 bool MainArguments(int args, std::vector<std::string> arg)
 {
-	if (args <= 2)
+	if (args < 2)
 	{
 		std::cout << "User Manual:\n";
 		return false;
@@ -383,7 +393,6 @@ bool MainArguments(int args, std::vector<std::string> arg)
 	bool bTexture = false;
 
 	int i = 1;
-
 	while (i < args)
 	{
 		if (arg[i] == "-m" && args > i)
@@ -407,6 +416,7 @@ bool MainArguments(int args, std::vector<std::string> arg)
 		{
 			texFile = static_cast<std::string>(arg[i + 1]);
 			if (texFile.find(".jpg") != std::string::npos ||
+				texFile.find(".jpeg") != std::string::npos ||
 				texFile.find(".png") != std::string::npos ||
 				texFile.find(".tga") != std::string::npos ||
 				texFile.find(".gif") != std::string::npos )
@@ -426,6 +436,36 @@ bool MainArguments(int args, std::vector<std::string> arg)
 				return false;
 			}
 			i++;
+		}
+		//	TESTING AND DEBUGGING COMMANDS: WILL NOT WORK OUTSIDE DEVELOPER ENVIRONMENT STRUCTURE
+		else if (arg[i] == "-to")
+		{
+			meshFile = testObj;
+			texFile = testTexture;
+			meshtype = EMeshType::OBJ;
+			return true;
+		}
+		else if (arg[i] == "-tf")
+		{
+			meshFile = testFbx;
+			texFile = testTexture;
+			meshScale = 1.f;
+			meshtype = EMeshType::FBX;
+			return true;
+		}
+		else if (arg[i] == "-tg")
+		{
+			meshFile = testGltf;
+			texFile = testTexture;
+			meshtype = EMeshType::GLTF;
+			return true;
+		}
+		else if (arg[i] == "-tge")
+		{
+			meshFile = testGltfEmb;
+			texFile = testTexture;
+			meshtype = EMeshType::GLTF;
+			return true;
 		}
 
 		i++;

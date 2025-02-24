@@ -76,6 +76,11 @@ bool Mesh::GltfFile(const std::string filename)
 	if (filename.find(".gltf") != std::string::npos)
 	{
 		std::ifstream file(filename);
+		if (!file)
+		{
+			std::cout << "Failed to open " << filename << std::endl;
+			return false;
+		}
 		JSON json = JSON::parse(file);
 		std::string uri = json["buffers"][0]["uri"];
 		unsigned int positionIndex = json["meshes"][0]["primitives"][0]["attributes"]["POSITION"];
@@ -98,8 +103,14 @@ bool Mesh::GltfFile(const std::string filename)
 		{
 			std::string binFileName = filename.substr(0, filename.find_last_of('/') + 1) + uri;
 			unsigned int fileSize = static_cast<unsigned int>(std::filesystem::file_size(binFileName));
+			std::cout << "DEBUG. Filesize as calculated by program: " << fileSize << std::endl;
 			binData.resize(fileSize);
 			std::ifstream binFile(binFileName, std::ios::binary);
+			if (!binFile)
+			{
+				std::cout << "Failed to open " << binFileName << std::endl;
+				return false;
+			}
 			binFile.read(reinterpret_cast<char*>(binData.data()), fileSize);
 			binFile.close();
 		}
@@ -400,11 +411,12 @@ bool Mesh::FbxFile(const std::string filename)
 				LoadBuffers();
 				return (bLoaded = true);	// This causees only one mesh to be loaded from the fbx. Should be alright for this project?
 			}
-			std::cout << "No meshes found in fbx structure.\n";
+			else
+				std::cout << "No mesh found in fbx child node " << i << std::endl;
 		}
 	}
 	else
-		std::cout << "No root node found.\n";
+		std::cout << "No root node found. Check path and filename.\n";
 
 	return false;
 }
