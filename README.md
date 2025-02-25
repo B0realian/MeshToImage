@@ -11,12 +11,16 @@ Low resolution texture with high resolution mesh fails to load: mesh renders bla
 
 Image output is still limited to raw .tga for RGB and ascii .pgm for 16-bit grayscale.
 
-Some .gltf-files have no separate Buffer View for indices and these will, currently, crash the program. Working on this.
+Some .gltf-files crash the program. Working on this.
 
 ## How it is used
 The program is executed from the command line with a mesh file and a texture file as necessary arguments. It will load a single mesh from a .obj, .fbx or .gltf file, with just a main texture. It will be presented unlit in perspective and can be zoomed and rotated using a mouse. When the user is satisfied with how the mesh is presented, it is possible to switch to orthographic mode with further camera controls mapped to the keyboard, and take a snapshot and save RGB + Z to image files. While it is possible to take snapshots in perspective view, the resulting depth data has much lesser quality.
 
-From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where both mesh and texture are necessary to start the program but can be in desired order (i.e. -t texture can be before -m mesh). 
+From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where both mesh and texture are necessary to start the program but can be in desired order (i.e. -t texture can be before -m mesh).
+
+Additional commands: 	-s float_scale where default is 0.01 (mesh-files that are prime candidates for this program tend to be too large for the renderer).
+						-f will flip the texture vertically. To be precise, the program flips by default and this command un-flips. If the texture looks broken, try this.
+
 
 ## Controls
 Left mouse button and move mouse: rotate object.
@@ -36,6 +40,7 @@ Space to toggle between orthographic and perspective.
 Return to take a snapshot.
 
 ## Build it yourself?
+Please note that my attempts to build an md-version (dynamic runtime libraries) made a build that only works on my machine :( so I have adopted code and libraries for static libraries (meaning glfw3_mt.lib instead of glfw3.lib, and mt-versions of the fbxsdk libs instead of the md-versions).
 As already mentioned, libraries you need are:
 
 ### OpenGL libs
