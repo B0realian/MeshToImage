@@ -38,14 +38,14 @@ std::string meshFile = "";
 std::string texFile = "";
 bool bFlipTexture = true;
 
-std::string testObj = "objects/test/test.obj";
-std::string testFbx = "objects/test/test.fbx";
-std::string testGltf = "objects/test/test_split.gltf";
-std::string testGltfEmb = "objects/test/test_embedded.gltf";
+std::string testObj = "test/test.obj";
+std::string testFbx = "test/test.fbx";
+std::string testGltf = "test/test_split.gltf";
+std::string testGltfEmb = "test/test_embedded.gltf";
 std::string testTexture = "textures/test.jpg";
 
-std::string devMFile = "objects/Mossy_Rock_alt.gltf";
-std::string devTFile = "textures/Mossy_Rock.jpg";
+std::string devMFile = "megascans/Mossy_Rock_alt.gltf";
+std::string devTFile = "megascans/Mossy_Rock.jpg";
 GLuint vbo, vao, ibo;
 
 glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);

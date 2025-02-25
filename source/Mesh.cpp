@@ -68,13 +68,16 @@ bool Mesh::GltfFile(const std::string filename)
 {
 	if (filename.find(".gltf") != std::string::npos)
 	{
+		std::cout << "Opening file " << filename << std::endl;
 		std::ifstream file(filename);
 		if (!file)
 		{
 			std::cout << "Failed to open " << filename << std::endl;
 			return false;
 		}
+		std::cout << "Parsing JSON..." << std::endl;
 		JSON json = JSON::parse(file);
+		std::cout << "Reading common gltf-variables..." << std::endl;
 		std::string uri = json["buffers"][0]["uri"];
 		unsigned int positionIndex = json["meshes"][0]["primitives"][0]["attributes"]["POSITION"];
 		unsigned int txcoordIndex = json["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_0"];
@@ -111,6 +114,7 @@ bool Mesh::GltfFile(const std::string filename)
 		std::vector<glm::vec2> tempUVs;
 		std::vector<unsigned char> binData;
 		
+		std::cout << "Looking for optional gltf-variables..." << std::endl;
 		if (json["bufferViews"][posBufferView].contains("byteStride"))
 			positionByteStride = json["bufferViews"][posBufferView]["byteStride"];
 		if (json["bufferViews"][txcoordBufferView].contains("byteStride"))
@@ -134,6 +138,7 @@ bool Mesh::GltfFile(const std::string filename)
 		if (uri.find(".bin") != std::string::npos)		// gltf with separate .bin containing mesh data
 		{
 			std::string binFileName = filename.substr(0, filename.find_last_of('/') + 1) + uri;
+			std::cout << "Reading separate bin-file " << binFileName << "..." << std::endl;
 			unsigned int fileSize = static_cast<unsigned int>(std::filesystem::file_size(binFileName));
 			binData.resize(fileSize);
 			std::ifstream binFile(binFileName, std::ios::binary);
@@ -147,6 +152,7 @@ bool Mesh::GltfFile(const std::string filename)
 		}
 		else											// gltf with embedded data, base64 encoded
 		{
+			std::cout << "Decoding embedded data..." << std::endl;
 			const char b64table[64] = { 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
 										'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
 										'0','1','2','3','4','5','6','7','8','9','+','/' };
