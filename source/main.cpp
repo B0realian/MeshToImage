@@ -442,6 +442,7 @@ bool MainArguments(int args, std::vector<std::string> arg)
 		{
 			meshFile = testObj;
 			texFile = testTexture;
+			meshScale = 1.f;
 			meshtype = EMeshType::OBJ;
 			return true;
 		}
@@ -457,6 +458,7 @@ bool MainArguments(int args, std::vector<std::string> arg)
 		{
 			meshFile = testGltf;
 			texFile = testTexture;
+			meshScale = 1.f;
 			meshtype = EMeshType::GLTF;
 			return true;
 		}
@@ -464,6 +466,7 @@ bool MainArguments(int args, std::vector<std::string> arg)
 		{
 			meshFile = testGltfEmb;
 			texFile = testTexture;
+			meshScale = 1.f;
 			meshtype = EMeshType::GLTF;
 			return true;
 		}

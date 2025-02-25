@@ -20,7 +20,7 @@ public:
 	bool LoadMesh(const std::string filename, EMeshType filetype);
 	void DrawTriangles();
 
-	float fbxScale = 0.01f;		// My .fbx-files in testing were far too big. YMMV.
+	float meshScale = 0.01f;		// A lot of my files in testing were far too big (and its easier to zoom in on a rendered mesh). YMMV.
 	int triangles = 0;
 
 private:
