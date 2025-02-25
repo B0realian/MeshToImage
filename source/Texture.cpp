@@ -17,10 +17,10 @@ Texture::~Texture()
 
 }
 
-bool Texture::LoadTexture(const std::string& filename, bool generateMipMaps)
+bool Texture::LoadTexture(const std::string& filename, bool generateMipMaps, bool flip)
 {
 	int width, height, components;
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(flip);
 	unsigned char* imageData = stbi_load(filename.c_str(), &width, &height, &components, STBI_rgb_alpha);
 	if (imageData == NULL)
 	{

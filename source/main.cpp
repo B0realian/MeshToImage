@@ -36,6 +36,7 @@ float meshScale = 0.01f;
 Texture texture;
 std::string meshFile = "";
 std::string texFile = "";
+bool bFlipTexture = true;
 
 std::string testObj = "objects/test/test.obj";
 std::string testFbx = "objects/test/test.fbx";
@@ -43,7 +44,7 @@ std::string testGltf = "objects/test/test_split.gltf";
 std::string testGltfEmb = "objects/test/test_embedded.gltf";
 std::string testTexture = "textures/test.jpg";
 
-std::string devMFile = "objects/Mossy_Rock.gltf";
+std::string devMFile = "objects/Mossy_Rock_alt.gltf";
 std::string devTFile = "textures/Mossy_Rock.jpg";
 GLuint vbo, vao, ibo;
 
@@ -94,7 +95,7 @@ int main(int argc, char* argv[])
 	
 	Mesh mesh(meshScale);
 	mesh.LoadMesh(meshFile, meshtype);
-	texture.LoadTexture(texFile, true);
+	texture.LoadTexture(texFile, true, bFlipTexture);
 	SetTitle(mesh.triangles);
 
 	CompileShaders(vShaderName, fShaderName);
@@ -385,7 +386,28 @@ bool MainArguments(int args, std::vector<std::string> arg)
 {
 	if (args < 2)
 	{
-		std::cout << "User Manual:\n";
+		std::cout << "User Instructions:\n";
+		std::cout << "\n";
+		std::cout << "tldr: -m mesh.fbx        (loads mesh file).\n";
+		std::cout << "      -t texture.jpg     (loads texture).\n";
+		std::cout << "      -s 1               (sets scale to 1).\n";
+		std::cout << "      -f                 (flips texture).\n";
+		std::cout << "To load a mesh, you must specify both a mesh-file and a texture-file (case sensitive) in the following manner:\n";
+		std::cout << "meshtoimage -m pathto/mesh.file -t pathto/texture.file\n";
+		std::cout << "The program will, by default, scale meshes by 0.01 (i.e. 1:100) since I noticed that a lot of meshes are too big for an OpenGL renderer.\n";
+		std::cout << "To change scale, add -s followed by desired scale, i.e. -s 1, or -s 0.1.\n";
+		std::cout << "Depending on mesh, the texture may need flipping. If you know you have the right texture but it looks broken, add -f.\n";
+		std::cout << "\n";
+		std::cout << "In program navigation:\n";
+		std::cout << "\n";
+		std::cout << "Hold left mouse button and move mouse: rotate mesh. (There is currently a lot of gimbal-lock issues. Still a work in progress).\n";
+		std::cout << "Hold right mouse button and move mouse: zoom mesh.\n";
+		std::cout << "V to toggle wireframe mode.\n";
+		std::cout << "Spacebar to toggle betweem orthographic and perspective view. (Program starts in perspective view).\n";
+		std::cout << "WASD to pan camera in orthographic mode.\n";
+		std::cout << "Q/E for orthographic zoom in/out. (Mouse zoom only works in perspective view).\n";
+		std::cout << "Z/X to limit/extend depth of field in orthographic mode. (Decreases/increases far render limit).\n";
+		std::cout << "Return to take a snapshot. Image filenames will increment while program is running.\n";
 		return false;
 	}
 
@@ -419,7 +441,7 @@ bool MainArguments(int args, std::vector<std::string> arg)
 				texFile.find(".jpeg") != std::string::npos ||
 				texFile.find(".png") != std::string::npos ||
 				texFile.find(".tga") != std::string::npos ||
-				texFile.find(".gif") != std::string::npos )
+				texFile.find(".gif") != std::string::npos)
 				bTexture = true;
 			else
 			{
@@ -437,6 +459,9 @@ bool MainArguments(int args, std::vector<std::string> arg)
 			}
 			i++;
 		}
+		else if (arg[i] == "-f")
+			bFlipTexture = false;
+
 		//	TESTING AND DEBUGGING COMMANDS: WILL NOT WORK OUTSIDE DEVELOPER ENVIRONMENT STRUCTURE
 		else if (arg[i] == "-to")
 		{
