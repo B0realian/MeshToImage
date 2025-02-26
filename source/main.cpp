@@ -29,6 +29,34 @@ std::map<std::string, int> uniformRegisterLocation;
 bool bWireFrameMode = false;
 std::string vShaderName = "shaders\\texOrbCam.vert";
 std::string fShaderName = "shaders\\texture.frag";
+const char* vertexShader =
+"#version 330 core\n"
+"layout(location = 0) in vec3 pos;"
+"layout(location = 1) in vec2 uv;"
+
+"uniform mat4 model;"
+"uniform mat4 view;"
+"uniform mat4 projection;"
+
+"out vec2 TexCoord;"
+
+"void main()"
+"{"
+	"gl_Position = projection * view * model * vec4(pos, 1.f);"
+	"TexCoord = uv;"
+"};";
+
+const char* fragmentShader =
+"#version 330 core\n"
+"in vec2 TexCoord;"
+"out vec4 frag_color;"
+
+"uniform sampler2D sampler;"
+
+"void main()"
+"{"
+	"frag_color = texture(sampler, TexCoord);"
+"};";
 
 EMeshType meshtype = EMeshType::FBX;
 float meshScale = 0.01f;
@@ -44,7 +72,7 @@ std::string testGltf = "test/test_split.gltf";
 std::string testGltfEmb = "test/test_embedded.gltf";
 std::string testTexture = "textures/test.jpg";
 
-std::string devMFile = "megascans/Mossy_Rock_alt.gltf";
+std::string devMFile = "megascans/Mossy_Rock.gltf";
 std::string devTFile = "megascans/Mossy_Rock.jpg";
 GLuint vbo, vao, ibo;
 
@@ -86,7 +114,7 @@ int main(int argc, char* argv[])
 	if (!MainArguments(argc, a))
 		return 0;
 	
-	/*meshFile = devMFile;
+	/*meshFile = devMFile;				// These lines are for quicker debugging/testing only
 	texFile = devTFile;
 	meshtype = EMeshType::GLTF;*/
 
@@ -171,15 +199,15 @@ void SetTitle(int triangles)
 
 void CompileShaders(const std::string vsName, const std::string fsName)
 {
-	std::string vertShader = ShaderToString(vsName);
+	/*std::string vertShader = ShaderToString(vsName);
 	std::string fragShader = ShaderToString(fsName);
 	const char* vsSourcePtr = vertShader.c_str();
-	const char* fsSourcePtr = fragShader.c_str();
+	const char* fsSourcePtr = fragShader.c_str();*/
 
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(vs, 1, &vsSourcePtr, NULL);
-	glShaderSource(fs, 1, &fsSourcePtr, NULL);
+	glShaderSource(vs, 1, &vertexShader, NULL);
+	glShaderSource(fs, 1, &fragmentShader, NULL);
 	glCompileShader(vs);
 	ShaderCompilationCheck(vs, SHADER);
 	glCompileShader(fs);
