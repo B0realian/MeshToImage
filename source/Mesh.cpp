@@ -137,16 +137,21 @@ bool Mesh::GltfFile(const std::string filename)
 
 		if (uri.find(".bin") != std::string::npos)		// gltf with separate .bin containing mesh data
 		{
-			std::string binFileName = filename.substr(0, filename.find_last_of('/') + 1) + uri;
+			std::string binFileName;
+			if (filename.find_last_of('/') == std::string::npos)
+				binFileName = filename.substr(0, filename.find_last_of('\\') + 1) + uri;
+			else
+				binFileName = filename.substr(0, filename.find_last_of('/') + 1) + uri;
+
 			std::cout << "Reading separate bin-file " << binFileName << "..." << std::endl;
-			unsigned int fileSize = static_cast<unsigned int>(std::filesystem::file_size(binFileName));
-			binData.resize(fileSize);
 			std::ifstream binFile(binFileName, std::ios::binary);
 			if (!binFile)
 			{
 				std::cout << "Failed to open " << binFileName << std::endl;
 				return false;
 			}
+			unsigned int fileSize = static_cast<unsigned int>(std::filesystem::file_size(binFileName));
+			binData.resize(fileSize);
 			binFile.read(reinterpret_cast<char*>(binData.data()), fileSize);
 			binFile.close();
 		}
