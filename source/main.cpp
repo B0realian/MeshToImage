@@ -27,8 +27,8 @@ const int SHADER = 0;
 const int PROGRAM = 1;
 std::map<std::string, int> uniformRegisterLocation;
 bool bWireFrameMode = false;
-std::string vShaderName = "shaders/texOrbCam.vert";
-std::string fShaderName = "shaders/texture.frag";
+std::string vShaderName = "shaders\\texOrbCam.vert";
+std::string fShaderName = "shaders\\texture.frag";
 
 EMeshType meshtype = EMeshType::FBX;
 float meshScale = 0.01f;
