@@ -6,6 +6,7 @@ MeshToImage/
 x64/
 
 # Debug subfolder:
+legacy/
 logs/
 
 # VS project files in root:
