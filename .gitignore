@@ -9,10 +9,10 @@ x64/
 logs/
 
 # VS project files in root:
-*.sln
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+/*.sln
+/*.vcxproj
+/*.vcxproj.filters
+/*.vcxproj.user
 
 # Proprietary files:
 megascans/
