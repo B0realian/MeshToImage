@@ -1,27 +1,9 @@
+#include "stdafx.h"//pre-compiled headers
+
+#include "../libs/json/json.hpp"//header-only, so not in stdafx.h? dunno...
 #include "Mesh.h"
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-
-#if _DEBUG
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-mt.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-mt.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-mt.lib")
-#else
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-mt.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-mt.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-mt.lib")
-#endif
-
-
-Mesh::Mesh()
-{
-}
-
-Mesh::Mesh(float scale)
-{
-	meshScale = scale;
-}
+#include "Enums.h"
+#include "VertexN.h"
 
 Mesh::~Mesh()
 {
@@ -31,89 +13,90 @@ Mesh::~Mesh()
 
 void Mesh::DrawTriangles()
 {
-	if (!bLoaded) return;
+	if (!num_vertices)
+		return;
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	glDrawArrays(GL_TRIANGLES, 0, num_vertices);
 	glBindVertexArray(0);
 }
 
-bool Mesh::LoadMesh(const std::string filename, EMeshType filetype)
+bool Mesh::LoadMesh(const char* in_filename, const EMeshType in_filetype, const float in_mesh_scale)
 {
-	switch (filetype)
+	switch (in_filetype)
 	{
-		case EMeshType::None:
-			std::cout << "No mesh file found.\n";
-			return false;
-		case EMeshType::GLTF:
-			if (GltfFile(filename))
-				return true;
-			break;
-		case EMeshType::OBJ:
-			if (ObjFile(filename))
-				return true;
-			break;
-		case EMeshType::FBX:
-			if (FbxFile(filename))
-				return true;
-			break;
-		default:
-			std::cout << "Unexpected error obtaining mesh.\n";
-			return false;
+	case EMeshType::None:
+		std::cout << "No mesh file found.\n";
+		return false;
+	case EMeshType::GLTF:
+		if (GltfFile(in_filename, in_mesh_scale))
+			return true;
+		break;
+	case EMeshType::OBJ:
+		if (ObjFile(in_filename, in_mesh_scale))
+			return true;
+		break;
+	case EMeshType::FBX:
+		if (FbxFile(in_filename, in_mesh_scale))
+			return true;
+		break;
+	default:
+		std::cout << "Unexpected error obtaining mesh.\n";
+		return false;
 	}
 	std::cout << "Error: File/enum mismatch.\n";
 	return false;
 }
 
-bool Mesh::GltfFile(const std::string filename)
+bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 {
-	if (filename.find(".gltf") != std::string::npos)
+	if (::strstr(in_filename, ".gltf"))
 	{
-		std::cout << "Opening file " << filename << std::endl;
-		std::ifstream file(filename);
+		std::cout << "Opening file " << in_filename << std::endl;
+		std::ifstream file(in_filename);
 		if (!file)
 		{
-			std::cout << "Failed to open " << filename << std::endl;
+			std::cout << "Failed to open " << in_filename << std::endl;
 			return false;
 		}
 		std::cout << "Parsing JSON..." << std::endl;
-		JSON json = JSON::parse(file);
+		nlohmann::json json = nlohmann::json::parse(file);
 		std::cout << "Reading common gltf-variables..." << std::endl;
 		std::string uri = json["buffers"][0]["uri"];
-		unsigned int positionIndex = json["meshes"][0]["primitives"][0]["attributes"]["POSITION"];
-		unsigned int txcoordIndex = json["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_0"];
-		unsigned int indicesIndex = json["meshes"][0]["primitives"][0]["indices"];
-		unsigned int posBufferView = json["accessors"][positionIndex]["bufferView"];
-		unsigned int txcoordBufferView = json["accessors"][txcoordIndex]["bufferView"];
-		unsigned int indBufferView = json["accessors"][indicesIndex]["bufferView"];
-		unsigned int indicesType = json["accessors"][indicesIndex]["componentType"];
-		unsigned int positionCount = json["accessors"][positionIndex]["count"];
-		unsigned int txcoordCount = json["accessors"][txcoordIndex]["count"];
-		unsigned int indicesCount = json["accessors"][indicesIndex]["count"];
-		unsigned int positionLength = json["bufferViews"][posBufferView]["byteLength"];
-		unsigned int txcoordLength = json["bufferViews"][txcoordBufferView]["byteLength"];
-		unsigned int indicesLength = json["bufferViews"][indBufferView]["byteLength"];
+		uint32_t positionIndex = json["meshes"][0]["primitives"][0]["attributes"]["POSITION"];
+		uint32_t txcoordIndex = json["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_0"];
+		uint32_t indicesIndex = json["meshes"][0]["primitives"][0]["indices"];
+		uint32_t posBufferView = json["accessors"][positionIndex]["bufferView"];
+		uint32_t txcoordBufferView = json["accessors"][txcoordIndex]["bufferView"];
+		uint32_t indBufferView = json["accessors"][indicesIndex]["bufferView"];
+		uint32_t indicesType = json["accessors"][indicesIndex]["componentType"];
+		uint32_t positionCount = json["accessors"][positionIndex]["count"];
+		uint32_t txcoordCount = json["accessors"][txcoordIndex]["count"];
+		uint32_t indicesCount = json["accessors"][indicesIndex]["count"];
+		//uint32_t positionLength = json["bufferViews"][posBufferView]["byteLength"];
+		//uint32_t txcoordLength = json["bufferViews"][txcoordBufferView]["byteLength"];
+		uint32_t indicesLength = json["bufferViews"][indBufferView]["byteLength"];
 
-		unsigned int counter = 0;
-		unsigned int posElementSize = 12;
-		unsigned int txcoordElementSize = 8;
-		unsigned int indElementSize = indicesLength / indicesCount;
+		uint32_t counter = 0;
+		uint32_t posElementSize = 12;
+		uint32_t txcoordElementSize = 8;
+		uint32_t indElementSize = indicesLength / indicesCount;
 
-		unsigned int positionByteStride = posElementSize;
-		unsigned int positionAccessorByteOffset = 0;
-		unsigned int txcoordByteStride = txcoordElementSize;
-		unsigned int txcoordAccessorByteOffset = 0;
-		unsigned int indicesByteStride = indElementSize;
-		unsigned int indicesAccessorByteOffset = 0;
+		uint32_t positionByteStride = posElementSize;
+		uint32_t positionAccessorByteOffset = 0;
+		uint32_t txcoordByteStride = txcoordElementSize;
+		uint32_t txcoordAccessorByteOffset = 0;
+		uint32_t indicesByteStride = indElementSize;
+		uint32_t indicesAccessorByteOffset = 0;
 
-		unsigned int positionOffset = 0;
-		unsigned int txcoordOffset = 0;
-		unsigned int indicesOffset = 0;
+		uint32_t positionOffset = 0;
+		uint32_t txcoordOffset = 0;
+		uint32_t indicesOffset = 0;
 
-		std::vector<unsigned int> vertexIndex, uvIndex;
+		std::vector<uint32_t> vertexIndex, uvIndex;
 		std::vector<glm::vec3> tempVertices;
 		std::vector<glm::vec2> tempUVs;
 		std::vector<unsigned char> binData;
-		
+
 		std::cout << "Looking for optional gltf-variables..." << std::endl;
 		if (json["bufferViews"][posBufferView].contains("byteStride"))
 			positionByteStride = json["bufferViews"][posBufferView]["byteStride"];
@@ -138,10 +121,13 @@ bool Mesh::GltfFile(const std::string filename)
 		if (uri.find(".bin") != std::string::npos)		// gltf with separate .bin containing mesh data
 		{
 			std::string binFileName;
-			if (filename.find_last_of('/') == std::string::npos)
-				binFileName = filename.substr(0, filename.find_last_of('\\') + 1) + uri;
-			else
-				binFileName = filename.substr(0, filename.find_last_of('/') + 1) + uri;
+			{
+				std::string slask = in_filename;
+				if (slask.find_last_of('/') == std::string::npos)
+					binFileName = slask.substr(0, slask.find_last_of('\\') + 1) + uri;
+				else
+					binFileName = slask.substr(0, slask.find_last_of('/') + 1) + uri;
+			}
 
 			std::cout << "Reading separate bin-file " << binFileName << "..." << std::endl;
 			std::ifstream binFile(binFileName, std::ios::binary);
@@ -150,7 +136,7 @@ bool Mesh::GltfFile(const std::string filename)
 				std::cout << "Failed to open " << binFileName << std::endl;
 				return false;
 			}
-			unsigned int fileSize = static_cast<unsigned int>(std::filesystem::file_size(binFileName));
+			uint32_t fileSize = static_cast<uint32_t>(std::filesystem::file_size(binFileName));
 			binData.resize(fileSize);
 			binFile.read(reinterpret_cast<char*>(binData.data()), fileSize);
 			binFile.close();
@@ -162,7 +148,7 @@ bool Mesh::GltfFile(const std::string filename)
 										'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
 										'0','1','2','3','4','5','6','7','8','9','+','/' };
 
-			unsigned int start = static_cast<unsigned int>(uri.find("base64,") + 7);
+			uint32_t start = static_cast<uint32_t>(uri.find("base64,") + 7);
 			uri = uri.substr(start);					// Assuming encoding will always be an octet stream. Check beginning of "uri" in gltf-file if decoding seems off.
 
 			int padding = uri.length() % 4;				// This should not be necessary but is a safeguard. 
@@ -186,7 +172,7 @@ bool Mesh::GltfFile(const std::string filename)
 					{
 						if (uriSub[c] == x)
 						{
-							from64[c] = idx;
+							from64[c] = (char)idx;
 							break;
 						}
 						idx++;
@@ -203,10 +189,10 @@ bool Mesh::GltfFile(const std::string filename)
 			}
 		}
 
-		
+
 		std::cout << "Retrieving gltf position data..." << std::endl;
 		counter = 0;
-		for (unsigned int i = positionOffset + positionAccessorByteOffset; counter < positionCount; i += posElementSize + (positionByteStride - posElementSize))
+		for (uint32_t i = positionOffset + positionAccessorByteOffset; counter < positionCount; i += posElementSize + (positionByteStride - posElementSize))
 		{
 			unsigned char xbytes[] = { binData[i],		binData[i + 1], binData[i + 2],	 binData[i + 3] };
 			unsigned char ybytes[] = { binData[i + 4],	binData[i + 5], binData[i + 6],  binData[i + 7] };
@@ -218,13 +204,13 @@ bool Mesh::GltfFile(const std::string filename)
 			std::memcpy(&z, zbytes, sizeof(float));
 			glm::vec3 tempVec = glm::vec3(x, y, z);
 			tempVertices.push_back(tempVec);
-				
+
 			counter++;
 		}
 
 		std::cout << "Retrieving gltf uv data..." << std::endl;
 		counter = 0;
-		for (unsigned int i = txcoordOffset + txcoordAccessorByteOffset; counter < txcoordCount; i += txcoordElementSize + (txcoordByteStride - txcoordElementSize))
+		for (uint32_t i = txcoordOffset + txcoordAccessorByteOffset; counter < txcoordCount; i += txcoordElementSize + (txcoordByteStride - txcoordElementSize))
 		{
 			unsigned char xbytes[] = { binData[i],		binData[i + 1], binData[i + 2], binData[i + 3] };
 			unsigned char ybytes[] = { binData[i + 4],	binData[i + 5], binData[i + 6], binData[i + 7] };
@@ -242,9 +228,9 @@ bool Mesh::GltfFile(const std::string filename)
 		counter = 0;
 		if (indicesType == 5121)
 		{
-			for (unsigned int i = indicesOffset + indicesAccessorByteOffset; counter < indicesCount; i += indElementSize + (indicesByteStride - indElementSize))
+			for (uint32_t i = indicesOffset + indicesAccessorByteOffset; counter < indicesCount; i += indElementSize + (indicesByteStride - indElementSize))
 			{
-				unsigned int value = static_cast<unsigned int>(binData[i]);
+				uint32_t value = static_cast<uint32_t>(binData[i]);
 				vertexIndex.push_back(value);
 
 				counter++;
@@ -252,7 +238,7 @@ bool Mesh::GltfFile(const std::string filename)
 		}
 		else if (indicesType == 5123)
 		{
-			for (unsigned int i = indicesOffset + indicesAccessorByteOffset; counter < indicesCount; i += indElementSize + (indicesByteStride - indElementSize))
+			for (uint32_t i = indicesOffset + indicesAccessorByteOffset; counter < indicesCount; i += indElementSize + (indicesByteStride - indElementSize))
 			{
 				unsigned char bytes[] = { binData[i], binData[i + 1] };
 				unsigned short value;
@@ -264,118 +250,131 @@ bool Mesh::GltfFile(const std::string filename)
 		}
 		else if (indicesType == 5125)
 		{
-			for (unsigned int i = indicesOffset + indicesAccessorByteOffset; counter < indicesCount; i += indElementSize + (indicesByteStride - indElementSize))
+			for (uint32_t i = indicesOffset + indicesAccessorByteOffset; counter < indicesCount; i += indElementSize + (indicesByteStride - indElementSize))
 			{
 				unsigned char bytes[] = { binData[i],	binData[i + 1],	binData[i + 2], binData[i + 3] };
-				unsigned int value;
-				std::memcpy(&value, bytes, sizeof(unsigned int));
+				uint32_t value;
+				std::memcpy(&value, bytes, sizeof(uint32_t));
 				vertexIndex.push_back(value);
 
 				counter++;
 			}
 		}
-		
+
 		std::cout << "Assembling vertices from data..." << std::endl;
-		for (unsigned int i = 0; i < vertexIndex.size(); i++)
+		std::vector<Vertex2> vertices;
+		for (
+			uint32_t i = 0;
+			i < vertexIndex.size();
+			++i
+			)
 		{
 			glm::vec3 vertex = tempVertices[vertexIndex[i]];
 			glm::vec2 uv = tempUVs[vertexIndex[i]];
-			vertex *= meshScale;
+			vertex *= in_mesh_scale;
 
 			Vertex2 meshVertex;
 			meshVertex.position = vertex;
 			meshVertex.texCoords = uv;
 			vertices.push_back(meshVertex);
 		}
+		num_vertices = (GLsizei)vertices.size();
 
-		triangles = vertexIndex.size() / 3;
+		triangles = (int32_t)vertexIndex.size() / 3;
 		file.close();
-		LoadBuffers();
-		return (bLoaded = true);
+		LoadBuffers(vertices);
+		return num_vertices;
 	}
 
 	return false;
 }
 
-bool Mesh::ObjFile(const std::string filename)
+bool Mesh::ObjFile(const char* in_filename, const float in_mesh_scale)
 {
-    if (filename.find(".obj") != std::string::npos)
-    {
-        std::vector<unsigned int> vertexIndex, uvIndex;
-        std::vector<glm::vec3> tempVertices;
-        std::vector<glm::vec2> tempUVs;
+	if (::strstr(in_filename, ".obj"))
+	{
+		std::vector<uint32_t> vertexIndex, uvIndex;
+		std::vector<glm::vec3> tempVertices;
+		std::vector<glm::vec2> tempUVs;
 
-        std::ifstream file(filename, std::ios::in);
-        if (!file)
-        {
-            std::cout << "Failed to open " << filename << std::endl;
-            return false;
-        }
+		std::ifstream file(in_filename, std::ios::in);
+		if (!file)
+		{
+			std::cout << "Failed to open " << in_filename << std::endl;
+			return false;
+		}
 
-        std::cout << "Loading " << filename << std::endl;
-        std::string linebuffer;
-        while (std::getline(file, linebuffer))
-        {
-            if (linebuffer.substr(0, 2) == "v ")
-            {
-                std::istringstream v(linebuffer.substr(2));
-                glm::vec3 vertex;
-                v >> vertex.x;
-                v >> vertex.y;
-                v >> vertex.z;
-                tempVertices.push_back(vertex);
-            }
-            else if (linebuffer.substr(0, 2) == "vt")
-            {
-                std::istringstream vt(linebuffer.substr(2));
-                glm::vec2 uv;
-                vt >> uv.x;
-                vt >> uv.y;
-                tempUVs.push_back(uv);
-            }
-            else if (linebuffer.substr(0, 2) == "f ")
-            {
-                int v1, v2, v3;
-                int t1, t2, t3;
-                int n1, n2, n3;
-                const char* face = linebuffer.c_str();
-                int match = sscanf_s(face, "f %i/%i/%i %i/%i/%i %i/%i/%i", &v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3);
-                if (match != 9)
-                    std::cout << "Failed to parse .obj." << std::endl;
+		std::cout << "Loading " << in_filename << std::endl;
+		std::string linebuffer;
+		while (std::getline(file, linebuffer))
+		{
+			if (linebuffer.substr(0, 2) == "v ")
+			{
+				std::istringstream v(linebuffer.substr(2));
+				glm::vec3 vertex;
+				v >> vertex.x;
+				v >> vertex.y;
+				v >> vertex.z;
+				tempVertices.push_back(vertex);
+			}
+			else if (linebuffer.substr(0, 2) == "vt")
+			{
+				std::istringstream vt(linebuffer.substr(2));
+				glm::vec2 uv;
+				vt >> uv.x;
+				vt >> uv.y;
+				tempUVs.push_back(uv);
+			}
+			else if (linebuffer.substr(0, 2) == "f ")
+			{
+				int v1, v2, v3;
+				int t1, t2, t3;
+				int n1, n2, n3;
+				const char* face = linebuffer.c_str();
+				int match = sscanf_s(face, "f %i/%i/%i %i/%i/%i %i/%i/%i", &v1, &t1, &n1, &v2, &t2, &n2, &v3, &t3, &n3);
+				if (match != 9)
+					std::cout << "Failed to parse .obj." << std::endl;
 
-                vertexIndex.push_back(v1 - 1);
-                vertexIndex.push_back(v2 - 1);
-                vertexIndex.push_back(v3 - 1);
-                uvIndex.push_back(t1 - 1);
-                uvIndex.push_back(t2 - 1);
-                uvIndex.push_back(t3 - 1);
-                // Not bothering with normals
-            }
-        }
-        file.close();
+				vertexIndex.push_back(v1 - 1);
+				vertexIndex.push_back(v2 - 1);
+				vertexIndex.push_back(v3 - 1);
+				uvIndex.push_back(t1 - 1);
+				uvIndex.push_back(t2 - 1);
+				uvIndex.push_back(t3 - 1);
+				// Not bothering with normals
+			}
+		}
+		file.close();
 
-        for (unsigned int i = 0; i < vertexIndex.size(); i++)
-        {
-            glm::vec3 vertex = tempVertices[vertexIndex[i]];
-            glm::vec2 uv = tempUVs[uvIndex[i]];
-			vertex *= meshScale;
+		std::vector<Vertex2> vertices;
+		for (
+			uint32_t i = 0;
+			i < vertexIndex.size();
+			++i
+			)
+		{
+			glm::vec3 vertex = tempVertices[vertexIndex[i]];
+			glm::vec2 uv = tempUVs[uvIndex[i]];
+			vertex *= in_mesh_scale;
 
-            Vertex2 meshVertex;
-            meshVertex.position = vertex;
-            meshVertex.texCoords = uv;
-            vertices.push_back(meshVertex);
-        }
+			Vertex2 meshVertex;
+			meshVertex.position = vertex;
+			meshVertex.texCoords = uv;
+			vertices.push_back(meshVertex);
+		}
+		num_vertices = (GLsizei)vertices.size();
 
-        triangles = vertexIndex.size() / 3;
+		triangles = (int32_t)vertexIndex.size() / 3;
 
-        LoadBuffers();
-        return (bLoaded = true);
-    }
+		LoadBuffers(vertices);
+		return num_vertices;
+	}
 
 	return false;
 }
 
-bool Mesh::FbxFile(const std::string filename)
+#if 0
+bool Mesh::FbxFile(const std::string filename, const float in_mesh_scale)
 {
 	FbxManager* manager = FbxManager::Create();
 	FbxIOSettings* ioSettings = FbxIOSettings::Create(manager, IOSROOT);
@@ -394,7 +393,7 @@ bool Mesh::FbxFile(const std::string filename)
 		FbxNode* childNode = 0;
 		std::vector<glm::vec3> tempVertices;
 		std::vector<glm::vec2> tempUVs;
-		std::vector<unsigned int> vertexIndex, uvIndex;
+		std::vector<uint32_t> vertexIndex, uvIndex;
 
 		for (int i = 0; i < childrenAmount; i++)
 		{
@@ -460,7 +459,7 @@ bool Mesh::FbxFile(const std::string filename)
 				{
 					glm::vec3 vertex = tempVertices[vertexIndex[n]];
 					glm::vec2 uv = tempUVs[n];
-					vertex *= meshScale;		// Vertice values turned out to be scaled up 100 times in my test megascan fbx. YMMV. 
+					vertex *= in_mesh_scale;		// Vertice values turned out to be scaled up 100 times in my test megascan fbx. YMMV. 
 
 					Vertex2 meshVertex;
 					meshVertex.position = vertex;
@@ -482,15 +481,23 @@ bool Mesh::FbxFile(const std::string filename)
 
 	return false;
 }
+#else
+bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
+{
+	in_filename;//w4: unreferenced
+	assert(0 && "temporarily disabled!");
+	return false;
+}
+#endif
 
-void Mesh::LoadBuffers()
+void Mesh::LoadBuffers(const std::vector<Vertex2>& in)
 {
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
 
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex2), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, in.size() * sizeof(Vertex2), &in[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)0);

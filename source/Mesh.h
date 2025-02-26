@@ -1,37 +1,27 @@
 #pragma once
-#define GLEW_STATIC
-#include "glew.h"
-#include "../libs/glm/glm.hpp"
-#include "../libs/json/json.hpp"
-#include <fbxsdk.h>
-#include <vector>
-#include <string>
-#include "Enums.h"
-#include "VertexN.h"
 
-using JSON = nlohmann::json;
+enum class EMeshType;
+struct Vertex2;
 
 class Mesh
 {
 public:
-	Mesh();
-	Mesh(float scale);
+
 	~Mesh();
-	bool LoadMesh(const std::string filename, EMeshType filetype);
+
+	bool LoadMesh(const char* filename, const EMeshType filetype, const float in_mesh_scale);
 	void DrawTriangles();
 
-	float meshScale = 0.01f;		// A lot of my files in testing were far too big (and its easier to zoom in on a rendered mesh). YMMV.
-	int triangles = 0;
+	int32_t triangles = 0;
 
 private:
-	bool GltfFile(const std::string filename);
-	bool ObjFile(const std::string filename);
-	bool FbxFile(const std::string filename);
-	void LoadBuffers();
 
-	bool bLoaded = false;
-	std::vector<Vertex2> vertices;
-	GLuint vao = 0;
-	GLuint vbo = 0;
+	bool GltfFile(const char* filename, const float in_mesh_scale);
+	bool ObjFile(const char* filename, const float in_mesh_scale);
+	bool FbxFile(const char* filename, const float in_mesh_scale);
+	void LoadBuffers(const std::vector<Vertex2>& in);
 
+	GLsizei num_vertices = 0;
+	uint32_t vao = 0;
+	uint32_t vbo = 0;
 };

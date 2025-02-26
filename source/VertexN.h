@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../libs/glm/glm.hpp"
 
 struct Vertex2
