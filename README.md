@@ -8,8 +8,8 @@ Because of its limited scope, both the renderer and mesh importers are very basi
 
 Noticing how the fbx sdk bloats the build, we decided to make a leaner version with only .gltf and .obj support. The resulting .exe is less than 1 mb. Both types are supplied in the repo.
 
-Basic code by Borealian (all the bugs are belong to me!)
-Refactoring by Johno (if it looks great, he did it)
+Basic code by Borealian (all the bugs are belong to me!).
+Refactoring by Johno (if it looks great, he did it).
 
 ## Remaining issues
 Severe gimbal-lock, particularly with upside-down meshes (assuming because that forces the user to adopt one more 90 degree angle).
