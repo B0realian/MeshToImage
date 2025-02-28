@@ -1,9 +1,20 @@
 #include "stdafx.h"//pre-compiled headers
 
 #include "../libs/json/json.hpp"//header-only, so not in stdafx.h? dunno...
+#include <fbxsdk.h>
 #include "Mesh.h"
 #include "Enums.h"
 #include "VertexN.h"
+
+#if _DEBUG
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-md.lib")
+#else
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-md.lib")
+#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-md.lib")
+#endif
 
 Mesh::~Mesh()
 {
@@ -373,15 +384,15 @@ bool Mesh::ObjFile(const char* in_filename, const float in_mesh_scale)
 	return false;
 }
 
-#if 0
-bool Mesh::FbxFile(const std::string filename, const float in_mesh_scale)
+//#if 0
+bool Mesh::FbxFile(const char* filename, const float in_mesh_scale)
 {
 	FbxManager* manager = FbxManager::Create();
 	FbxIOSettings* ioSettings = FbxIOSettings::Create(manager, IOSROOT);
 	manager->SetIOSettings(ioSettings);
 
 	FbxImporter* importer = FbxImporter::Create(manager, "");
-	importer->Initialize(filename.c_str(), -1, manager->GetIOSettings());
+	importer->Initialize(filename, -1, manager->GetIOSettings());
 	FbxScene* scene = FbxScene::Create(manager, "SceneName");
 	importer->Import(scene);
 	importer->Destroy();
@@ -455,6 +466,7 @@ bool Mesh::FbxFile(const std::string filename, const float in_mesh_scale)
 					}
 				}
 
+				std::vector<Vertex2> vertices;
 				for (int n = 0; n < vertexIndex.size(); n++)
 				{
 					glm::vec3 vertex = tempVertices[vertexIndex[n]];
@@ -466,11 +478,11 @@ bool Mesh::FbxFile(const std::string filename, const float in_mesh_scale)
 					meshVertex.texCoords = uv;
 					vertices.push_back(meshVertex);
 				}
+				num_vertices = (GLsizei)vertices.size();
+				triangles = (int32_t)vertexIndex.size() / 3;
 
-				triangles = vertices.size() / 3;
-
-				LoadBuffers();
-				return (bLoaded = true);	// This causees only one mesh to be loaded from the fbx. Should be alright for this project?
+				LoadBuffers(vertices);
+				return num_vertices;	// This causees only one mesh to be loaded from the fbx. Should be alright for this project?
 			}
 			else
 				std::cout << "No mesh found in fbx child node " << i << std::endl;
@@ -481,14 +493,14 @@ bool Mesh::FbxFile(const std::string filename, const float in_mesh_scale)
 
 	return false;
 }
-#else
-bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
-{
-	in_filename;//w4: unreferenced
-	assert(0 && "temporarily disabled!");
-	return false;
-}
-#endif
+//#else
+//bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
+//{
+//	in_filename;//w4: unreferenced
+//	assert(0 && "temporarily disabled!");
+//	return false;
+//}
+//#endif
 
 void Mesh::LoadBuffers(const std::vector<Vertex2>& in)
 {

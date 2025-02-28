@@ -24,8 +24,8 @@ const char* testFbx = "test/test.fbx";
 const char* testGltf = "test/test_split.gltf";
 const char* testGltfEmb = "test/test_embedded.gltf";
 const char* testTexture = "textures/test.jpg";
-const char* devMFile = "megascans/Mossy_Rock_alt.gltf";
-const char* devTFile = "megascans/Mossy_Rock.jpg";
+const char* devMFile = "megascans/Lava_Outcrop.fbx";
+const char* devTFile = "megascans/Lava_Outcrop.jpg";
 //IMMUTABLE
 //IMMUTABLE
 //IMMUTABLE
@@ -526,10 +526,10 @@ int main(int in_argc, char* in_argv[])
 		return 0;
 
 	/*__state.meshFile = devMFile;
-	__state.meshtype = EMeshType::GLTF;
+	__state.meshtype = EMeshType::FBX;
 	__state.meshScale = 0.01f;
 	__state.texFile = devTFile;
-	__state.bFlipTexture = false;*/
+	__state.bFlipTexture = true;*/
 
 	if (!__init())
 		return -1;
