@@ -25,8 +25,8 @@ From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where bo
 
 Additional commands: 	-s scale where default is 0.01  
 (mesh-files that are prime candidates for this program tend to be too large for the renderer).  
-						-f will flip the texture vertically.  
-						To be precise, the program flips by default and this command un-flips. If the texture looks broken, try this.
+                        -f will flip the texture vertically.  
+To be precise, the program flips by default and this command un-flips. If the texture looks broken, try this.
 
 ## Controls
 Left mouse button and move mouse: rotate object.
