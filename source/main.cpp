@@ -286,12 +286,12 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 		in_key == GLFW_KEY_A &&
 		__state.bOrthographic
 		)
-		__state.subjectOffset.x += 0.05f;
+		__state.subjectOffset.x -= 0.05f;
 	else if (
 		in_key == GLFW_KEY_D &&
 		__state.bOrthographic
 		)
-		__state.subjectOffset.x -= 0.05f;
+		__state.subjectOffset.x += 0.05f;
 	else if (
 		in_key == GLFW_KEY_Z &&
 		__state.bOrthographic
