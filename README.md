@@ -12,8 +12,6 @@ Basic code by Borealian (all the bugs are belong to me!).
 Refactoring by Johno (if it looks great, he did it).
 
 ## Remaining issues
-Severe gimbal-lock, particularly with upside-down meshes (assuming because that forces the user to adopt one more 90 degree angle).
-
 Panning (in ortho-mode) changes the perspective (sounds weird but you'll see what I mean).
 
 Low resolution texture with high resolution mesh fails to bind: mesh renders black.
