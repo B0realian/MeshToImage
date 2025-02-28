@@ -23,10 +23,12 @@ The program is executed from the command line with a mesh file and a texture fil
 
 From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where both mesh and texture are necessary to start the program but can be in desired order (i.e. -t texture can be before -m mesh).
 
-Additional commands: 	-s scale where default is 0.01  
-(mesh-files that are prime candidates for this program tend to be too large for the renderer).  
-                        -f will flip the texture vertically.  
-To be precise, the program flips by default and this command un-flips. If the texture looks broken, try this.
+Additional commands:
+-s scale where default is 0.01.  
+-f will flip the texture vertically.
+
+Many of the prime candidates among mesh-files for this project are far too big, hence the default of 0.01 scale.  
+To be precise, the program flips by default and -f un-flips. If the texture looks broken, try this.
 
 ## Controls
 Left mouse button and move mouse: rotate object.
