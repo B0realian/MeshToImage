@@ -30,6 +30,8 @@ Additional commands:
 Many of the prime candidates among mesh-files for this project are far too big, hence the default of 0.01 scale.  
 To be precise, the program flips by default and -f un-flips. If the texture looks broken, try this.
 
+Example using all commands: m2i_full -m mesh.fbx -t texture.jpg -f -s 0.1
+
 ## Controls
 Left mouse button and move mouse: rotate object.
 
