@@ -53,10 +53,7 @@ Space to toggle between orthographic and perspective.
 Return to take a snapshot.
 
 ## Build it yourself?
-Please note that my attempts to build an md-version (dynamic runtime libraries) made a build that only works on my machine :( so I have adopted code and libraries for static libraries (meaning glfw3_mt.lib instead of glfw3.lib, and mt-versions of the fbxsdk libs instead of the md-versions).
-Links are at the bottom.
-
-Note that the lib folder in the repo contains the necessary includes of all libraries apart from fbx. Also note that GLM, STB and json.hpp are header only libraries so should require minimal effort to include. GLFW and GLEW need to be linked but this process is well documented elsewhere, as is linking the fbx sdk (I found https://www.youtube.com/watch?v=oIKnBVP2Jgg helpful). If making a md-build (default) you need to change the pragmas relating to fbx in mesh.cpp to md-libs. You need to edit those pragmas regardless to accommodate your file paths. 
+Note that the lib folder in the repo contains the necessary includes of all libraries apart from fbx. Also note that GLM, STB and json.hpp are header only libraries so should require minimal effort to include. GLFW and GLEW need to be linked but this process is well documented elsewhere, as is linking the fbx sdk (I found https://www.youtube.com/watch?v=oIKnBVP2Jgg helpful). If making a mt-build (md is default) you need to change the pragmas relating to fbx in mesh.cpp to mt-libs. You need to edit those pragmas regardless to accommodate your file paths. 
 
 ### OpenGL libs
 GLEW (https://glew.sourceforge.net/)  
