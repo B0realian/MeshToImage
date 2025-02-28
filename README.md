@@ -23,7 +23,7 @@ The program is executed from the command line with a mesh file and a texture fil
 
 From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where both mesh and texture are necessary to start the program but can be in desired order (i.e. -t texture can be before -m mesh).
 
-Additional commands:
+Additional commands:  
 -s scale where default is 0.01.  
 -f will flip the texture vertically.
 
