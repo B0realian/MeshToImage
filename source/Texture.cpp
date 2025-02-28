@@ -94,6 +94,16 @@ void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int
 	else
 		std::cout << "Failed to save RGB-data." << std::endl;
 
+	float maxHeight = 1.f;
+	for (int i = 0; i < (in_width * in_height); i++)
+	{
+		// REMEMBER: depth values are inverted
+		if (maxHeight > capturedDepth[i])
+			maxHeight = capturedDepth[i];
+	}
+
+	float contrastRatio = 1 / (1 - maxHeight);
+
 	std::ofstream heightFile(GM_Filename);
 	if (heightFile.is_open())
 	{
@@ -110,7 +120,9 @@ void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int
 				++j
 				)
 			{
-				uint16_t tempValue = uint16_t((-65535 * capturedDepth[j + i]) + 65535);
+				uint16_t tempValue = uint16_t((-65535 * capturedDepth[j + i]) + 65535) * contrastRatio;
+				if (tempValue > 65535)
+					tempValue = 65535;
 				heightFile << tempValue << "\n";
 			}
 		}
