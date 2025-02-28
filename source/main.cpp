@@ -2,6 +2,7 @@
 
 #include "../libs/glm/gtc/matrix_transform.hpp"//header-only, so not in stdafx.h? dunno...
 #include "../libs/glm/gtc/type_ptr.hpp"//header-only, so not in stdafx.h? dunno...
+#include "../libs/glm/gtc/quaternion.hpp"
 #include "Enums.h"
 #include "Mesh.h"
 #include "Texture.h"
@@ -16,6 +17,8 @@ enum
 	PROGRAM,
 };
 const char* mainWindowTitle = "Mesh to Image";
+
+// DEBUGGING/TESTING STRINGS:
 const char* testObj = "test/test.obj";
 const char* testFbx = "test/test.fbx";
 const char* testGltf = "test/test_split.gltf";
@@ -60,6 +63,7 @@ static struct state_t
 	glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 10.f);
 	glm::vec3 subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 
+	float mouseSensitivity = 0.01f;
 	float orthoZoom = 5.f;
 	float orthoFar = 10.f;
 
@@ -262,32 +266,32 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 		in_key == GLFW_KEY_E &&
 		__state.bOrthographic
 		)
-		__state.orthoZoom -= 0.25f;
+		__state.orthoZoom -= 0.1f;
 	else if (
 		in_key == GLFW_KEY_Q &&
 		__state.bOrthographic
 		)
-		__state.orthoZoom += 0.25f;
+		__state.orthoZoom += 0.1f;
 	else if (
 		in_key == GLFW_KEY_W &&
 		__state.bOrthographic
 		)
-		__state.subjectOffset.y -= 0.1f;
+		__state.subjectOffset.y -= 0.05f;
 	else if (
 		in_key == GLFW_KEY_S &&
 		__state.bOrthographic
 		)
-		__state.subjectOffset.y += 0.1f;
+		__state.subjectOffset.y += 0.05f;
 	else if (
 		in_key == GLFW_KEY_A &&
 		__state.bOrthographic
 		)
-		__state.subjectOffset.x += 0.1f;
+		__state.subjectOffset.x += 0.05f;
 	else if (
 		in_key == GLFW_KEY_D &&
 		__state.bOrthographic
 		)
-		__state.subjectOffset.x -= 0.1f;
+		__state.subjectOffset.x -= 0.05f;
 	else if (
 		in_key == GLFW_KEY_Z &&
 		__state.bOrthographic
@@ -308,14 +312,14 @@ static void __on_mouse_move(GLFWwindow* in_window, double in_pos_x, double in_po
 
 	if (glfwGetMouseButton(__state.mainWindow, GLFW_MOUSE_BUTTON_LEFT) == 1)
 	{
-		__state.camYaw -= ((float)in_pos_x - lastMousePos.x) * 0.25f;
-		__state.camPitch += ((float)in_pos_y - lastMousePos.y) * 0.25f;
+		__state.camYaw -= (static_cast<float>(in_pos_x) - lastMousePos.x) * __state.mouseSensitivity;
+		__state.camPitch += (static_cast<float>(in_pos_y) - lastMousePos.y) * __state.mouseSensitivity;
 	}
 
 	if (glfwGetMouseButton(__state.mainWindow, GLFW_MOUSE_BUTTON_RIGHT) == 1)
 	{
-		float dX = 0.01f * ((float)in_pos_x - lastMousePos.x);
-		float dY = 0.01f * ((float)in_pos_y - lastMousePos.y);
+		float dX = 0.01f * (static_cast<float>(in_pos_x) - lastMousePos.x);
+		float dY = 0.01f * (static_cast<float>(in_pos_y) - lastMousePos.y);
 		__state.camRadius += dX - dY;
 	}
 
@@ -476,20 +480,18 @@ void main()
 	//delete[] vs_bytes;
 }
 
-static void __move_camera(const float dYaw, float dPitch)
+static void __move_camera(const float rYaw, float rPitch)
 {
-	dPitch = glm::clamp(dPitch, -90.f, 90.f);
+	rPitch = glm::clamp(rPitch, -1.57f, 1.57f);		// 1.57: just shy of half Pi, i.e. slightly less than 90 in degrees
 
-	const float yawR = glm::radians(dYaw);
-	const float pitchR = glm::radians(dPitch);
-
-	__state.camPosition.x = __state.subjectPos.x + __state.camRadius * cosf(pitchR) * sinf(yawR);
-	__state.camPosition.y = __state.subjectPos.y + __state.camRadius * sinf(pitchR);
-	__state.camPosition.z = __state.subjectPos.z + __state.camRadius * cosf(pitchR) * cosf(yawR);
+	__state.camPosition.x = __state.subjectPos.x + __state.camRadius * cosf(rPitch) * sinf(rYaw);
+	__state.camPosition.y = __state.subjectPos.y + __state.camRadius * sinf(rPitch);
+	__state.camPosition.z = __state.subjectPos.z + __state.camRadius * cosf(rPitch) * cosf(rYaw);
 }
 
 static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& projection)
 {
+	// Model = Translation * Rotation * Scale
 	model = glm::translate(model, __state.subjectPos);
 	view = glm::lookAt(__state.camPosition, __state.subjectPos + __state.subjectOffset, __state.camUp);
 
@@ -522,6 +524,12 @@ int main(int in_argc, char* in_argv[])
 {
 	if (!__main_arguments(in_argc, in_argv))
 		return 0;
+
+	/*__state.meshFile = devMFile;
+	__state.meshtype = EMeshType::GLTF;
+	__state.meshScale = 0.01f;
+	__state.texFile = devTFile;
+	__state.bFlipTexture = false;*/
 
 	if (!__init())
 		return -1;
