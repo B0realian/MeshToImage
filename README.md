@@ -8,7 +8,7 @@ Because of its limited scope, both the renderer and mesh importers are very basi
 
 Noticing how the fbx sdk bloats the build, we decided to make a leaner version with only .gltf and .obj support. The resulting .exe is less than 1 mb. Both types are supplied in the repo.
 
-Basic code by Borealian (all the bugs are belong to me!).
+Basic code by Borealian (all the bugs are belong to me!).  
 Refactoring by Johno (if it looks great, he did it).
 
 ## Remaining issues
@@ -19,11 +19,11 @@ Low resolution texture with high resolution mesh fails to bind: mesh renders bla
 Image output is still limited to raw .tga for RGB and ascii .pgm for 16-bit grayscale.
 
 ## How it is used
-The program is executed from the command line with a mesh file and a texture file as necessary arguments. It will load a single mesh from a .obj, .fbx or .gltf file, with just a main texture. It will be presented unlit in perspective and can be zoomed and rotated using a mouse. When the user is satisfied with how the mesh is presented, it is possible to switch to orthographic mode with further camera controls mapped to the keyboard, and take a snapshot and save RGB + Z to image files. While it is possible to take snapshots in perspective view, the resulting depth data has much lesser quality.
+The program is executed from the command line with a mesh file and a texture file as necessary arguments. It will load a single mesh from a .obj, .fbx or .gltf file, with just a main texture. It will be presented unlit in perspective and can be zoomed and rotated using a mouse. When the user is satisfied with how the mesh is presented, it is possible to switch to orthographic mode with further camera controls mapped to the keyboard, and take a snapshot and save RGB + Z to image files. While it is possible to take snapshots in perspective view, the resulting depth data has much lesser quality. Also, please note that max depth is at the far clipping plane, meaning you will want the far clipping plane to be as close to the mesh as possible for better depth data. (Holding Z will move the far clipping plane closer to the camera).
 
 From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where both mesh and texture are necessary to start the program but can be in desired order (i.e. -t texture can be before -m mesh).
 
-Additional commands: 	-s float_scale where default is 0.01 (mesh-files that are prime candidates for this program tend to be too large for the renderer).
+Additional commands: 	-s float_scale where default is 0.01 (mesh-files that are prime candidates for this program tend to be too large for the renderer).  
 						-f will flip the texture vertically. To be precise, the program flips by default and this command un-flips. If the texture looks broken, try this.
 
 ## Controls
@@ -50,8 +50,8 @@ Links are at the bottom.
 Note that the lib folder in the repo contains the necessary includes of all libraries apart from fbx. Also note that GLM, STB and json.hpp are header only libraries so should require minimal effort to include. GLFW and GLEW need to be linked but this process is well documented elsewhere, as is linking the fbx sdk (I found https://www.youtube.com/watch?v=oIKnBVP2Jgg helpful). If making a md-build (default) you need to change the pragmas relating to fbx in mesh.cpp to md-libs. You need to edit those pragmas regardless to accommodate your file paths. 
 
 ### OpenGL libs
-GLEW (https://glew.sourceforge.net/)
-GLFW (https://www.glfw.org/download)
+GLEW (https://glew.sourceforge.net/)  
+GLFW (https://www.glfw.org/download)  
 GLM (https://github.com/g-truc/glm)
 
 ### Texture loading lib
