@@ -21,6 +21,9 @@ Image output is still limited to raw .tga for RGB and ascii .pgm for 16-bit gray
 ## How it is used
 The program is executed from the command line with a mesh file and a texture file as necessary arguments. It will load a single mesh from a .obj, .fbx or .gltf file, with just a main texture. It will be presented unlit in perspective and can be zoomed and rotated using a mouse. When the user is satisfied with how the mesh is presented, it is possible to switch to orthographic mode with further camera controls mapped to the keyboard, and take a snapshot and save RGB + Z to image files. While it is possible to take snapshots in perspective view, the resulting depth data has much lesser quality. Also, please note that max depth is at the far clipping plane, meaning you will want the far clipping plane to be as close to the mesh as possible for better depth data. (Holding Z will move the far clipping plane closer to the camera).
 
+![Mostly white](textures/HeightMap1.png "Far clipping plane over the hills.")
+![Lots of greys](textures/HeightMap2.png "Far clipping plane at mesh base.")
+
 From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where both mesh and texture are necessary to start the program but can be in desired order (i.e. -t texture can be before -m mesh).
 
 Additional commands:  
