@@ -1,4 +1,4 @@
-#include "stdafx.h"//pre-compiled headers
+#include "stdafx.h"
 
 #include "../libs/json/json.hpp"//header-only, so not in stdafx.h? dunno...
 #include <fbxsdk.h>

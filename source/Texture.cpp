@@ -1,4 +1,4 @@
-#include "stdafx.h"//pre-compiled headers
+#include "stdafx.h"
 
 //this is included here and not in stdafx.h (pre-compiled header) in order to respect how SBT_IMAGE is doing code generation (for implementation)
 #define STB_IMAGE_IMPLEMENTATION
@@ -13,7 +13,6 @@ Texture::Texture()
 
 Texture::~Texture()
 {
-
 }
 
 bool Texture::LoadTexture(const char* in_filename, const bool in_generate_mipmaps, const bool in_flip)
@@ -85,9 +84,9 @@ void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int
 			GLubyte tempR = static_cast<GLubyte>(255 * capturedColor[i + 2]);
 			GLubyte tempG = static_cast<GLubyte>(255 * capturedColor[i + 1]);
 			GLubyte tempB = static_cast<GLubyte>(255 * capturedColor[i]);
-			colFile.write((char*)&tempR, 1);
-			colFile.write((char*)&tempG, 1);
-			colFile.write((char*)&tempB, 1);
+			colFile.write(reinterpret_cast<char*>(&tempR), 1);
+			colFile.write(reinterpret_cast<char*>(&tempG), 1);
+			colFile.write(reinterpret_cast<char*>(&tempB), 1);
 		}
 		colFile.close();
 	}
@@ -97,7 +96,7 @@ void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int
 	float maxHeight = 1.f;
 	for (int i = 0; i < (in_width * in_height); i++)
 	{
-		// REMEMBER: depth values are inverted
+		// REMEMBER: depth values are 0-1 float, 0 closest to cam (i.e. highest).
 		if (maxHeight > capturedDepth[i])
 			maxHeight = capturedDepth[i];
 	}

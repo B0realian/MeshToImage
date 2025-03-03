@@ -1,7 +1,5 @@
 #pragma once
 
-//what is here is largely to taste, but I tend to put all c or c++ standard library stuff here, windows if you need it, and external lib headers
-
 #include <format>
 #include <fstream>
 #include <iostream>
