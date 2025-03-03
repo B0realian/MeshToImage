@@ -145,6 +145,7 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 			if (!binFile)
 			{
 				std::cout << "Failed to open " << binFileName << std::endl;
+				file.close();
 				return false;
 			}
 			uint32_t fileSize = static_cast<uint32_t>(std::filesystem::file_size(binFileName));
