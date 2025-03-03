@@ -390,10 +390,8 @@ static void __shader_compiliation_check(const GLuint in_shader, const EShaderTyp
 static void __compile_shaders()
 {
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-	{
-		//with gl it's happily trivial to inline shader source in the exe
-		//also yay c++20 string literals!
-		const char* VERTEX_PROGRAM = R"foo(
+	
+	const char* VERTEX_PROGRAM = R"foo(
 #version 330 core
 
 layout(location = 0) in vec3 pos;
@@ -411,16 +409,14 @@ void main()
 	TexCoord = uv;
 };
 )foo";
-		glShaderSource(vs, 1, &VERTEX_PROGRAM, NULL);
-	}
+	glShaderSource(vs, 1, &VERTEX_PROGRAM, NULL);
+	
 	glCompileShader(vs);
 	__shader_compiliation_check(vs, EShaderType::SHADER);
 
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-	{
-		//with gl it's happily trivial to inline shader source in the exe
-		//also yay c++20 string literals!
-		const char* FRAGMENT_PROGRAM = R"foo(
+		
+	const char* FRAGMENT_PROGRAM = R"foo(
 #version 330 core
 
 in vec2 TexCoord;
@@ -433,9 +429,8 @@ void main()
    frag_color = texture(sampler, TexCoord);
 };
 )foo";
-		glShaderSource(fs, 1, &FRAGMENT_PROGRAM, NULL);
-	}
-
+	glShaderSource(fs, 1, &FRAGMENT_PROGRAM, NULL);
+	
 	glCompileShader(fs);
 	__shader_compiliation_check(fs, EShaderType::SHADER);
 
@@ -465,7 +460,7 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 	model = glm::translate(model, __state.subjectPos);
 	view = glm::lookAt(__state.camPosition, __state.subjectPos + __state.subjectOffset, __state.camUp);
 
-	const float ASPECT_RATIO = (float)__state.mainWindowHeight / (float)__state.mainWindowWidth;
+	const float ASPECT_RATIO = static_cast<float>(__state.mainWindowHeight) / static_cast<float>(__state.mainWindowWidth);
 
 	if (__state.bOrthographic)
 		projection = glm::ortho(
