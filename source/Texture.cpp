@@ -69,7 +69,7 @@ void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int
 	std::string path = in_path;
 	if (path.back() == '/' || path.back() == '\\')
 		path.pop_back();
-	std::filesystem::create_directory(path);
+	std::filesystem::create_directories(path);
 	
 	std::string filename;
 	if (in_filename.find('\\') != std::string::npos)
