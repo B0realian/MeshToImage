@@ -491,16 +491,16 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 //ENTRYPOINT
 //ENTRYPOINT
 //ENTRYPOINT
-int main(/*int in_argc, char* in_argv[]*/)
+int main(int in_argc, char* in_argv[])
 {
-	/*if (!__main_arguments(in_argc, in_argv))
-		return 0;*/
+	if (!__main_arguments(in_argc, in_argv))
+		return 0;
 
-	__state.meshFile = devMFile;
+	/*__state.meshFile = devMFile;
 	__state.meshtype = EMeshType::FBX;
 	__state.meshScale = 0.01f;
 	__state.texFile = devTFile;
-	__state.bFlipTexture = true;
+	__state.bFlipTexture = true;*/
 
 	if (!__init())
 		return -1;
