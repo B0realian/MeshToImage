@@ -38,7 +38,7 @@ public:
 	bool LoadTexture(const char* in_filename, bool in_generate_mipmaps = true, bool in_flip = true);
 	void Bind(const uint32_t texUnit = 0);
 	void Unbind(const uint32_t texUnit = 0);
-	void SaveRaw(const int32_t in_width, int32_t const in_height, const int32_t in_file_num);
+	void SaveRaw(const int32_t in_width, int32_t const in_height, const int32_t in_file_num, const std::string filename, const std::string path);
 	//void SaveTiff(const int width, const int height, const int fileNum);		// Wishlisted to be able to save all data in a single file
 
 private:

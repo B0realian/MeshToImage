@@ -35,6 +35,7 @@ static struct state_t
 
 	std::string meshFile = "";
 	std::string texFile = "";
+	std::string filePath = "captures";
 
 	int32_t mainWindowHeight = 1080;
 	int32_t mainWindowWidth = 1920;
@@ -164,6 +165,11 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 			}
 			i++;
 		}
+		else if (0 == ::strcmp(in_argv[i], "-p") &&
+			in_argc > i)
+		{
+			__state.filePath = in_argv[i + 1];
+		}
 		else if (0 == ::strcmp(in_argv[i], "-f"))
 			__state.bFlipTexture = false;
 
@@ -234,7 +240,7 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 	}
 	if (in_key == GLFW_KEY_ENTER && in_action == GLFW_PRESS)
 	{
-		__state.texture.SaveRaw(__state.mainWindowWidth, __state.mainWindowHeight, __state.captures);
+		__state.texture.SaveRaw(__state.mainWindowWidth, __state.mainWindowHeight, __state.captures, __state.meshFile, __state.filePath);
 		++__state.captures;
 		return;
 	}
@@ -485,23 +491,24 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 //ENTRYPOINT
 //ENTRYPOINT
 //ENTRYPOINT
-int main(int in_argc, char* in_argv[])
+int main(/*int in_argc, char* in_argv[]*/)
 {
-	if (!__main_arguments(in_argc, in_argv))
-		return 0;
+	/*if (!__main_arguments(in_argc, in_argv))
+		return 0;*/
 
-	/*__state.meshFile = devMFile;
+	__state.meshFile = devMFile;
 	__state.meshtype = EMeshType::FBX;
 	__state.meshScale = 0.01f;
 	__state.texFile = devTFile;
-	__state.bFlipTexture = true;*/
+	__state.bFlipTexture = true;
 
 	if (!__init())
 		return -1;
 
 	Mesh mesh;
 	mesh.LoadMesh(__state.meshFile.c_str(), __state.meshtype, __state.meshScale);
-	__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture);
+	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
+		return -3;
 	
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <filesystem>
 
 //this is included here and not in stdafx.h (pre-compiled header) in order to respect how SBT_IMAGE is doing code generation (for implementation)
 #define STB_IMAGE_IMPLEMENTATION
@@ -57,15 +58,31 @@ void Texture::Unbind(const uint32_t texUnit)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int32_t in_file_num)
+void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int32_t in_file_num, const std::string in_filename, const std::string in_path)
 {
 	assert(in_width < 65536);
 	tgaHeader.width = (uint16_t)in_width;
 	assert(in_height < 65536);
 	tgaHeader.height = (uint16_t)in_height;
 	pgmHeader.size = std::format("{} {}\n", in_width, in_height);
-	std::string RGB_Filename = std::format("logs/Texture{}.tga", in_file_num);
-	std::string GM_Filename = std::format("logs/HeightMap{}.pgm", in_file_num);
+	
+	std::string path = in_path;
+	if (path.back() == '/' || path.back() == '\\')
+		path.pop_back();
+	std::filesystem::create_directory(path);
+	
+	std::string filename;
+	if (in_filename.find('\\') != std::string::npos)
+		filename = in_filename.substr(in_filename.find_last_of('\\') + 1);
+	else if (in_filename.find("/") != std::string::npos)
+		filename = in_filename.substr(in_filename.find_last_of('/') + 1);
+	else
+		filename = in_filename;
+	filename.resize(filename.size() - 4);
+
+	std::string RGB_Filename = std::format("{}/{}_rgb{}.tga", path, filename, in_file_num);
+	std::string GM_Filename = std::format("{}/{}_hm{}.pgm", path, filename, in_file_num);
+	std::cout << "Filename: " + RGB_Filename << std::endl;
 	float* capturedColor = new float[in_width * in_height * 3];
 	float* capturedDepth = new float[in_width * in_height];
 	glReadPixels(0, 0, in_width, in_height, GL_RGB, GL_FLOAT, capturedColor);
