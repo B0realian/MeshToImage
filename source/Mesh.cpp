@@ -1,20 +1,20 @@
 #include "stdafx.h"
 
 #include "../libs/json/json.hpp"//header-only, so not in stdafx.h? dunno...
-#include <fbxsdk.h>
+//#include <fbxsdk.h>
 #include "Mesh.h"
 #include "Enums.h"
 #include "VertexN.h"
 
-#if _DEBUG
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-md.lib")
-#else
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-md.lib")
-#endif
+//#if _DEBUG
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-md.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-md.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-md.lib")
+//#else
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-md.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-md.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-md.lib")
+//#endif
 
 Mesh::~Mesh()
 {
@@ -385,7 +385,7 @@ bool Mesh::ObjFile(const char* in_filename, const float in_mesh_scale)
 	return false;
 }
 
-//#if 0
+#if 0
 bool Mesh::FbxFile(const char* filename, const float in_mesh_scale)
 {
 	FbxManager* manager = FbxManager::Create();
@@ -494,14 +494,14 @@ bool Mesh::FbxFile(const char* filename, const float in_mesh_scale)
 
 	return false;
 }
-//#else
-//bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
-//{
-//	in_filename;//w4: unreferenced
-//	assert(0 && "temporarily disabled!");
-//	return false;
-//}
-//#endif
+#else
+bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
+{
+	in_filename;//w4: unreferenced
+	assert(0 && "Portable version lacks .fbx support.");
+	return false;
+}
+#endif
 
 void Mesh::LoadBuffers(const std::vector<Vertex2>& in)
 {
