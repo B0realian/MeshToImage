@@ -47,13 +47,11 @@ static struct state_t
 	GLuint shaderProgram = 0;
 	Texture texture;
 
-	glm::vec3 camPosition = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 camPosition = glm::vec3(0.f, 0.f, 10.f);
 	glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
-	float camYaw = 0.f;
-	float camPitch = 0.f;
-	float camRadius = 10.f;
 
-	glm::vec3 subjectPos = glm::vec3(0.f, 0.f, 10.f);
+	glm::vec3 subjectPosition = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 subjectRotation = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 
 	float mouseSensitivity = 0.01f;
@@ -63,6 +61,8 @@ static struct state_t
 	bool bWireFrameMode = false;
 	bool bFlipTexture = true;
 	bool bOrthographic = false;
+
+	//double previousTime = 0;
 } __state;//personal style - anything file local has a __ prefix...
 //MUTABLE
 //MUTABLE
@@ -247,12 +247,14 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 	if (in_key == GLFW_KEY_SPACE && in_action == GLFW_PRESS)
 	{
 		if (!__state.bOrthographic)
+		{
+			__state.orthoFar = __state.camPosition.z + 2.f;
 			__state.bOrthographic = true;
+		}
 		else
 		{
 			__state.bOrthographic = false;
 			__state.orthoZoom = 5.f;
-			__state.orthoFar = 10.f;
 			__state.subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 		}
 		return;
@@ -308,15 +310,17 @@ static void __on_mouse_move(GLFWwindow* in_window, double in_pos_x, double in_po
 
 	if (glfwGetMouseButton(__state.mainWindow, GLFW_MOUSE_BUTTON_LEFT) == 1)
 	{
-		__state.camYaw -= (static_cast<float>(in_pos_x) - lastMousePos.x) * __state.mouseSensitivity;
-		__state.camPitch += (static_cast<float>(in_pos_y) - lastMousePos.y) * __state.mouseSensitivity;
+		__state.subjectRotation.y += (static_cast<float>(in_pos_x) - lastMousePos.x) * __state.mouseSensitivity;
+		__state.subjectRotation.x += (static_cast<float>(in_pos_y) - lastMousePos.y) * __state.mouseSensitivity;
 	}
 
 	if (glfwGetMouseButton(__state.mainWindow, GLFW_MOUSE_BUTTON_RIGHT) == 1)
 	{
-		float dX = 0.01f * (static_cast<float>(in_pos_x) - lastMousePos.x);
-		float dY = 0.01f * (static_cast<float>(in_pos_y) - lastMousePos.y);
-		__state.camRadius += dX - dY;
+		float dX = __state.mouseSensitivity * 5.f * (static_cast<float>(in_pos_x) - lastMousePos.x);
+		float dY = __state.mouseSensitivity * 5.f * (static_cast<float>(in_pos_y) - lastMousePos.y);
+		__state.camPosition.z += (dX - dY);
+		if (__state.camPosition.z < 0.1f)
+			__state.camPosition.z = 0.1f;
 	}
 
 	lastMousePos.x = static_cast<float>(in_pos_x);
@@ -452,33 +456,41 @@ void main()
 	glDeleteShader(vs);
 }
 
-static void __move_camera(const float rYaw, float rPitch)
-{
-	rPitch = glm::clamp(rPitch, -1.57f, 1.57f);		// 1.57: just shy of half Pi, i.e. slightly less than 90 in degrees
-
-	__state.camPosition.x = __state.subjectPos.x + __state.camRadius * cosf(rPitch) * sinf(rYaw);
-	__state.camPosition.y = __state.subjectPos.y + __state.camRadius * sinf(rPitch);
-	__state.camPosition.z = __state.subjectPos.z + __state.camRadius * cosf(rPitch) * cosf(rYaw);
-}
-
 static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& projection)
 {
-	model = glm::translate(model, __state.subjectPos);
-	view = glm::lookAt(__state.camPosition, __state.subjectPos + __state.subjectOffset, __state.camUp);
-
+	/*double currentTime = glfwGetTime();
+	static double deltaTime = 0;
+	deltaTime += (currentTime - __state.previousTime);*/
+	
+	model = glm::rotate(model, __state.subjectRotation.y * 1.5f, glm::vec3(0.f, 1.f, 0.f));
+	const float xRot = cosf(__state.subjectRotation.y * 1.5f);
+	const float zRot = sinf(__state.subjectRotation.y * 1.5f);
+	model = glm::rotate(model, __state.subjectRotation.x * 1.5f, glm::vec3(xRot, 0.f, zRot));
+	
+	view = glm::lookAt(__state.camPosition, __state.subjectPosition + __state.subjectOffset, __state.camUp);
+	
 	const float ASPECT_RATIO = static_cast<float>(__state.mainWindowHeight) / static_cast<float>(__state.mainWindowWidth);
 
 	if (__state.bOrthographic)
+	{
 		projection = glm::ortho(
 			-__state.orthoZoom,
 			__state.orthoZoom,
 			-__state.orthoZoom * ASPECT_RATIO,
 			__state.orthoZoom * ASPECT_RATIO,
 			0.01f,
-			__state.orthoFar
-		);
+			__state.orthoFar);
+		
+		/*if (deltaTime >= 1.0)
+		{
+			std::cout << "Camera Z: " << __state.camPosition.z << " Far render: " << __state.orthoFar << std::endl;
+			deltaTime = 0;
+		}*/
+	}
 	else
 		projection = glm::perspective(glm::radians(45.f), (1.f / ASPECT_RATIO), 0.1f, 100.f);
+
+	//__state.previousTime = currentTime;
 }
 
 //END FILE LOCAL FUNCTIONS
@@ -522,11 +534,11 @@ int main(int in_argc, char* in_argv[])
 	const GLint UNIFORM_VIEW = glGetUniformLocation(__state.shaderProgram, "view");
 	const GLint UNIFORM_PROJECTION = glGetUniformLocation(__state.shaderProgram, "projection");
 
+	//__state.previousTime = glfwGetTime();
+
 	while (!glfwWindowShouldClose(__state.mainWindow))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		__move_camera(__state.camYaw, __state.camPitch);
 
 		glm::mat4 model(1.f);
 		glm::mat4 view(1.f);
