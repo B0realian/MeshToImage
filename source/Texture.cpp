@@ -4,7 +4,7 @@
 //this is included here and not in stdafx.h (pre-compiled header) in order to respect how SBT_IMAGE is doing code generation (for implementation)
 #define STB_IMAGE_IMPLEMENTATION
 #include "../libs/stb/stb_image.h"
-
+#include "VertexN.h"
 #include "Texture.h"
 
 Texture::Texture()
@@ -60,6 +60,9 @@ void Texture::Unbind(const uint32_t texUnit)
 
 void Texture::SaveRaw(const int32_t in_width, int32_t const in_height, const int32_t in_file_num, const std::string in_filename, const std::string in_path)
 {
+	Raw_RGB_TGA_Header tgaHeader;
+	Raw_16bit_PGM_Header pgmHeader;
+
 	assert(in_width < 65536);
 	tgaHeader.width = (uint16_t)in_width;
 	assert(in_height < 65536);

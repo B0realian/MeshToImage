@@ -47,7 +47,4 @@ private:
 
 	uint32_t texture;
 
-	//FIXME: why are these members? only used during output (could be on the stack)?
-	Raw_RGB_TGA_Header tgaHeader;
-	Raw_16bit_PGM_Header pgmHeader;
 };

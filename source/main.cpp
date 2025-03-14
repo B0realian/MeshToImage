@@ -5,13 +5,14 @@
 #include "Enums.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "TextMap.h"
+#include "UIText.h"
 
 //IMMUTABLE
 //IMMUTABLE
 //IMMUTABLE
 //IMMUTABLE
 const char* mainWindowTitle = "Mesh to Image";
-
 // DEBUGGING/TESTING STRINGS:
 const char* testObj = "test/test.obj";
 const char* testFbx = "test/test.fbx";
@@ -44,8 +45,10 @@ static struct state_t
 	EMeshType meshtype = EMeshType::FBX;
 	float meshScale = 0.01f;
 
-	GLuint shaderProgram = 0;
+	GLuint shaderProgramMesh = 0;
+	GLuint shaderProgramText = 1;
 	Texture texture;
+	Texture bmText;
 
 	glm::vec3 camPosition = glm::vec3(0.f, 0.f, 10.f);
 	glm::vec3 camUp = glm::vec3(0.f, 1.f, 0.f);
@@ -85,6 +88,7 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 		std::cout << "      -t texture.jpg     (loads texture).\n";
 		std::cout << "      -s 1               (sets scale to 1).\n";
 		std::cout << "      -f                 (flips texture).\n";
+		std::cout << "      -p save/path       (changes save dir from default).\n";
 		std::cout << "To load a mesh, you must specify both a mesh-file and a texture-file (case sensitive) in the following manner:\n";
 		std::cout << "meshtoimage -m pathto/mesh.file -t pathto/texture.file\n";
 		std::cout << ".obj and .gltf works with portable version, full version adds .fbx.\n";
@@ -94,7 +98,7 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 		std::cout << "\n";
 		std::cout << "In program navigation:\n";
 		std::cout << "\n";
-		std::cout << "Hold left mouse button and move mouse: rotate mesh. (There is currently a lot of gimbal-lock issues. Still a work in progress).\n";
+		std::cout << "Hold left mouse button and move mouse: rotate mesh.\n";
 		std::cout << "Hold right mouse button and move mouse: zoom mesh.\n";
 		std::cout << "V to toggle wireframe mode.\n";
 		std::cout << "Spacebar to toggle betweem orthographic and perspective view. (Program starts in perspective view).\n";
@@ -364,7 +368,7 @@ static bool __init()
 	return true;
 }
 
-static void __shader_compiliation_check(const GLuint in_shader, const EShaderType in_type)
+static void __shader_compilation_check(const GLuint in_shader, const EShaderType in_type)
 {
 	int status = 0;
 	switch (in_type)
@@ -401,7 +405,7 @@ static void __compile_shaders()
 {
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	
-	const char* VERTEX_PROGRAM = R"foo(
+	const char* VERTEX_SHADER_MESH = R"foo(
 #version 330 core
 
 layout(location = 0) in vec3 pos;
@@ -419,14 +423,14 @@ void main()
 	TexCoord = uv;
 };
 )foo";
-	glShaderSource(vs, 1, &VERTEX_PROGRAM, NULL);
+	glShaderSource(vs, 1, &VERTEX_SHADER_MESH, NULL);
 	
 	glCompileShader(vs);
-	__shader_compiliation_check(vs, EShaderType::SHADER);
+	__shader_compilation_check(vs, EShaderType::SHADER);
 
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 		
-	const char* FRAGMENT_PROGRAM = R"foo(
+	const char* FRAGMENT_SHADER_MESH = R"foo(
 #version 330 core
 
 in vec2 TexCoord;
@@ -439,21 +443,74 @@ void main()
    frag_color = texture(sampler, TexCoord);
 };
 )foo";
-	glShaderSource(fs, 1, &FRAGMENT_PROGRAM, NULL);
+	glShaderSource(fs, 1, &FRAGMENT_SHADER_MESH, NULL);
 	
 	glCompileShader(fs);
-	__shader_compiliation_check(fs, EShaderType::SHADER);
+	__shader_compilation_check(fs, EShaderType::SHADER);
 
-	__state.shaderProgram = glCreateProgram();
-	glAttachShader(__state.shaderProgram, vs);
-	glAttachShader(__state.shaderProgram, fs);
-	glLinkProgram(__state.shaderProgram);
-	__shader_compiliation_check(__state.shaderProgram, EShaderType::PROGRAM);
-	glDetachShader(__state.shaderProgram, vs);
-	glDetachShader(__state.shaderProgram, fs);
+	__state.shaderProgramMesh = glCreateProgram();
+	glAttachShader(__state.shaderProgramMesh, vs);
+	glAttachShader(__state.shaderProgramMesh, fs);
+	glLinkProgram(__state.shaderProgramMesh);
+	__shader_compilation_check(__state.shaderProgramMesh, EShaderType::PROGRAM);
+	glDetachShader(__state.shaderProgramMesh, vs);
+	glDetachShader(__state.shaderProgramMesh, fs);
 
 	glDeleteShader(fs);
 	glDeleteShader(vs);
+
+	GLuint vst = glCreateShader(GL_VERTEX_SHADER);
+	const char* VERTEX_SHADER_TEXT = R"raw(
+#version 330 core
+
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec2 uv;
+layout(location = 2) in vec3 colour;
+
+out vec2 TexCoord;
+out vec3 textColour;
+
+void main()
+{
+	gl_Position = vec4(pos, 1.f);
+	TexCoord = uv;
+	textColour = colour;
+};
+)raw";
+	glShaderSource(vst, 1, &VERTEX_SHADER_TEXT, NULL);
+	glCompileShader(vst);
+	__shader_compilation_check(vst, EShaderType::SHADER);
+
+	GLuint fst = glCreateShader(GL_FRAGMENT_SHADER);
+	const char* FRAGMENT_SHADER_TEXT = R"raw(
+#version 330 core
+
+in vec2 TexCoord;
+in vec3 textColour;
+
+out vec4 frag_color;
+
+uniform sampler2D sampler;
+
+void main()
+{
+	frag_color = texture(sampler, TexCoord) * vec4(textColour, 1);
+};
+)raw";
+	glShaderSource(fst, 1, &FRAGMENT_SHADER_TEXT, NULL);
+	glCompileShader(fst);
+	__shader_compilation_check(fst, EShaderType::SHADER);
+
+	__state.shaderProgramText = glCreateProgram();
+	glAttachShader(__state.shaderProgramText, vst);
+	glAttachShader(__state.shaderProgramText, fst);
+	glLinkProgram(__state.shaderProgramText);
+	__shader_compilation_check(__state.shaderProgramText, EShaderType::PROGRAM);
+	glDetachShader(__state.shaderProgramText, vst);
+	glDetachShader(__state.shaderProgramText, fst);
+
+	glDeleteShader(fst);
+	glDeleteShader(vst);
 }
 
 static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& projection)
@@ -488,7 +545,7 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 		}*/
 	}
 	else
-		projection = glm::perspective(glm::radians(45.f), (1.f / ASPECT_RATIO), 0.1f, 100.f);
+		projection = glm::perspective(glm::radians(45.f), (1.f / ASPECT_RATIO), 0.01f, 100.f);
 
 	//__state.previousTime = currentTime;
 }
@@ -503,16 +560,16 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 //ENTRYPOINT
 //ENTRYPOINT
 //ENTRYPOINT
-int main(int in_argc, char* in_argv[])
+int main(/*int in_argc, char* in_argv[]*/)
 {
-	if (!__main_arguments(in_argc, in_argv))
-		return 0;
+	/*if (!__main_arguments(in_argc, in_argv))
+		return 0;*/
 
-	/*__state.meshFile = devMFile;
+	__state.meshFile = devMFile;
 	__state.meshtype = EMeshType::FBX;
 	__state.meshScale = 0.01f;
 	__state.texFile = devTFile;
-	__state.bFlipTexture = true;*/
+	__state.bFlipTexture = true;
 
 	if (!__init())
 		return -1;
@@ -521,6 +578,8 @@ int main(int in_argc, char* in_argv[])
 	mesh.LoadMesh(__state.meshFile.c_str(), __state.meshtype, __state.meshScale);
 	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
 		return -3;
+	__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false);
+	const std::map<char, BMuv> textmap = TextMap::GetMap();
 	
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
@@ -530,9 +589,9 @@ int main(int in_argc, char* in_argv[])
 	__compile_shaders();
 
 	//cache uniform locations locally
-	const GLint UNIFORM_MODEL = glGetUniformLocation(__state.shaderProgram, "model");
-	const GLint UNIFORM_VIEW = glGetUniformLocation(__state.shaderProgram, "view");
-	const GLint UNIFORM_PROJECTION = glGetUniformLocation(__state.shaderProgram, "projection");
+	const GLint UNIFORM_MODEL = glGetUniformLocation(__state.shaderProgramMesh, "model");
+	const GLint UNIFORM_VIEW = glGetUniformLocation(__state.shaderProgramMesh, "view");
+	const GLint UNIFORM_PROJECTION = glGetUniformLocation(__state.shaderProgramMesh, "projection");
 
 	//__state.previousTime = glfwGetTime();
 
@@ -540,26 +599,33 @@ int main(int in_argc, char* in_argv[])
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		__state.bmText.Bind();
+		glUseProgram(__state.shaderProgramText);
+		UIText textline(__state.mainWindowWidth, __state.mainWindowHeight);
+		textline.WriteLine("Testing!", textmap, ETextColour::YELLOW);
+		__state.bmText.Unbind();
+
 		glm::mat4 model(1.f);
 		glm::mat4 view(1.f);
 		glm::mat4 projection(1.f);
 		__camera_projection(model, view, projection);
 
 		__state.texture.Bind();
-
-		glUseProgram(__state.shaderProgram);
+		glUseProgram(__state.shaderProgramMesh);
 
 		glUniformMatrix4fv(UNIFORM_MODEL, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(UNIFORM_VIEW, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(UNIFORM_PROJECTION, 1, GL_FALSE, glm::value_ptr(projection));
 
 		mesh.DrawTriangles();
+		__state.texture.Unbind();
 
 		glfwSwapBuffers(__state.mainWindow);
 		glfwPollEvents();
 	}
 
-	glDeleteProgram(__state.shaderProgram);
+	glDeleteProgram(__state.shaderProgramMesh);
+	glDeleteProgram(__state.shaderProgramText);
 	glfwTerminate();
 	return 0;
 }

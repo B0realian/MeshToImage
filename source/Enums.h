@@ -14,3 +14,12 @@ enum class EShaderType
 	PROGRAM,
 	None = -1
 };
+
+enum class ETextColour
+{
+	None,		// Equivalent to white
+	RED,
+	GREEN,
+	BLUE,
+	YELLOW
+};
