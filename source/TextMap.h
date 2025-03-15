@@ -36,5 +36,4 @@ public:
 		return bmuv;
 	}
 
-	//static const BMuv 
 };

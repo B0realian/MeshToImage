@@ -472,7 +472,7 @@ out vec3 textColour;
 
 void main()
 {
-	gl_Position = vec4(pos, 1.f);
+	gl_Position = vec4(pos, 1.f) + vec4(-0.95f, 0.95f, 0.f, 0.f);
 	TexCoord = uv;
 	textColour = colour;
 };
@@ -579,7 +579,7 @@ int main(/*int in_argc, char* in_argv[]*/)
 	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
 		return -3;
 	__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false);
-	const std::map<char, BMuv> textmap = TextMap::GetMap();
+	const static std::map<char, BMuv> textmap = TextMap::GetMap();
 	
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
@@ -602,7 +602,7 @@ int main(/*int in_argc, char* in_argv[]*/)
 		__state.bmText.Bind();
 		glUseProgram(__state.shaderProgramText);
 		UIText textline(__state.mainWindowWidth, __state.mainWindowHeight);
-		textline.WriteLine("Testing!", textmap, ETextColour::YELLOW);
+		textline.WriteLine(R"raw( !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~)raw", textmap, ETextColour::GREEN);
 		__state.bmText.Unbind();
 
 		glm::mat4 model(1.f);
