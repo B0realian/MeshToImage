@@ -24,7 +24,7 @@ void UIText::WriteLine(const std::string text, const std::map<char, BMuv> &textm
 
 void UIText::WriteLine(const std::string text, const std::map<char, BMuv> &textmap, const ETextColour in_colour)
 {
-	if (text.size() < 200)
+	if (text.size() < 90)
 	{
 
 		glm::vec3 colour;

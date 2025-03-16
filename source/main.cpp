@@ -470,9 +470,12 @@ layout(location = 2) in vec3 colour;
 out vec2 TexCoord;
 out vec3 textColour;
 
+uniform int line;
+
 void main()
 {
-	gl_Position = vec4(pos, 1.f) + vec4(-0.95f, 0.95f, 0.f, 0.f);
+	float ypos = 0.95f - (line * 0.03f);
+	gl_Position = vec4(pos, 1.f) + vec4(-0.99f, ypos, 0.f, 0.f);
 	TexCoord = uv;
 	textColour = colour;
 };
@@ -592,6 +595,7 @@ int main(/*int in_argc, char* in_argv[]*/)
 	const GLint UNIFORM_MODEL = glGetUniformLocation(__state.shaderProgramMesh, "model");
 	const GLint UNIFORM_VIEW = glGetUniformLocation(__state.shaderProgramMesh, "view");
 	const GLint UNIFORM_PROJECTION = glGetUniformLocation(__state.shaderProgramMesh, "projection");
+	const GLint UNIFORM_LINE = glGetUniformLocation(__state.shaderProgramText, "line");
 
 	//__state.previousTime = glfwGetTime();
 
@@ -601,8 +605,17 @@ int main(/*int in_argc, char* in_argv[]*/)
 
 		__state.bmText.Bind();
 		glUseProgram(__state.shaderProgramText);
-		UIText textline(__state.mainWindowWidth, __state.mainWindowHeight);
-		textline.WriteLine(R"raw( !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~)raw", textmap, ETextColour::GREEN);
+		UIText textline1(__state.mainWindowWidth, __state.mainWindowHeight);
+		UIText textline2(__state.mainWindowWidth, __state.mainWindowHeight);
+		const std::string FAR = std::to_string(__state.orthoFar);
+		const std::string MESHPOS = std::to_string(__state.camPosition.z);
+		glUniform1i(UNIFORM_LINE, 0);
+		if (__state.bOrthographic)
+			textline1.WriteLine("Far render: " + FAR, textmap, ETextColour::YELLOW);
+		else
+			textline1.WriteLine("Far render: 100", textmap, ETextColour::GREEN);
+		glUniform1i(UNIFORM_LINE, 1);
+		textline2.WriteLine("Mesh Z-position: " + MESHPOS, textmap, ETextColour::YELLOW);
 		__state.bmText.Unbind();
 
 		glm::mat4 model(1.f);
@@ -612,11 +625,9 @@ int main(/*int in_argc, char* in_argv[]*/)
 
 		__state.texture.Bind();
 		glUseProgram(__state.shaderProgramMesh);
-
 		glUniformMatrix4fv(UNIFORM_MODEL, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(UNIFORM_VIEW, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(UNIFORM_PROJECTION, 1, GL_FALSE, glm::value_ptr(projection));
-
 		mesh.DrawTriangles();
 		__state.texture.Unbind();
 
