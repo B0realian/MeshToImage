@@ -3,6 +3,7 @@
 #include "../libs/glm/gtc/matrix_transform.hpp"//header-only, so not in stdafx.h? dunno...
 #include "../libs/glm/gtc/type_ptr.hpp"//header-only, so not in stdafx.h? dunno...
 #include "Enums.h"
+#include "VertexN.h"
 #include "Mesh.h"
 #include "Texture.h"
 #include "TextMap.h"
@@ -582,7 +583,8 @@ int main(/*int in_argc, char* in_argv[]*/)
 	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
 		return -3;
 	__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false);
-	const static std::map<char, BMuv> textmap = TextMap::GetMap();
+	std::map<char, BMuv> textmap;
+	GetMap(textmap);
 	
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
@@ -603,6 +605,19 @@ int main(/*int in_argc, char* in_argv[]*/)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glm::mat4 model(1.f);
+		glm::mat4 view(1.f);
+		glm::mat4 projection(1.f);
+		__camera_projection(model, view, projection);
+
+		__state.texture.Bind();
+		glUseProgram(__state.shaderProgramMesh);
+		glUniformMatrix4fv(UNIFORM_MODEL, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(UNIFORM_VIEW, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(UNIFORM_PROJECTION, 1, GL_FALSE, glm::value_ptr(projection));
+		mesh.DrawTriangles();
+		__state.texture.Unbind();
+
 		__state.bmText.Bind();
 		glUseProgram(__state.shaderProgramText);
 		UIText textline1(__state.mainWindowWidth, __state.mainWindowHeight);
@@ -618,19 +633,6 @@ int main(/*int in_argc, char* in_argv[]*/)
 		textline2.WriteLine("Mesh Z-position: " + MESHPOS, textmap, ETextColour::YELLOW);
 		__state.bmText.Unbind();
 
-		glm::mat4 model(1.f);
-		glm::mat4 view(1.f);
-		glm::mat4 projection(1.f);
-		__camera_projection(model, view, projection);
-
-		__state.texture.Bind();
-		glUseProgram(__state.shaderProgramMesh);
-		glUniformMatrix4fv(UNIFORM_MODEL, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(UNIFORM_VIEW, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(UNIFORM_PROJECTION, 1, GL_FALSE, glm::value_ptr(projection));
-		mesh.DrawTriangles();
-		__state.texture.Unbind();
-
 		glfwSwapBuffers(__state.mainWindow);
 		glfwPollEvents();
 	}
@@ -640,3 +642,4 @@ int main(/*int in_argc, char* in_argv[]*/)
 	glfwTerminate();
 	return 0;
 }
+ 
