@@ -57,6 +57,7 @@ static struct state_t
 	glm::vec3 subjectPosition = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 subjectRotation = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 subjectOffset = glm::vec3(0.f, 0.f, 0.f);
+	float textY = 0.05f;
 
 	float mouseSensitivity = 0.01f;
 	float orthoZoom = 5.f;
@@ -224,6 +225,7 @@ static void __on_frame_buffer_size(GLFWwindow* in_window, int in_width, int in_h
 
 	__state.mainWindowWidth = in_width;
 	__state.mainWindowHeight = in_height;
+	__state.textY = 1.f / __state.mainWindowHeight * 60;
 	glViewport(0, 0, __state.mainWindowWidth, __state.mainWindowHeight);
 }
 
@@ -365,6 +367,7 @@ static bool __init()
 	glViewport(0, 0, __state.mainWindowWidth, __state.mainWindowHeight);
 	glfwSwapInterval(0);
 	glEnable(GL_DEPTH_TEST);
+	__state.textY = 1.f / __state.mainWindowHeight * 60;
 
 	return true;
 }
@@ -472,10 +475,11 @@ out vec2 TexCoord;
 out vec3 textColour;
 
 uniform int line;
+uniform float textY;
 
 void main()
 {
-	float ypos = 0.95f - (line * 0.03f);
+	float ypos = (1 - textY) - (line * (textY * 0.7f));
 	gl_Position = vec4(pos, 1.f) + vec4(-0.99f, ypos, 0.f, 0.f);
 	TexCoord = uv;
 	textColour = colour;
@@ -564,16 +568,16 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 //ENTRYPOINT
 //ENTRYPOINT
 //ENTRYPOINT
-int main(int in_argc, char* in_argv[])
+int main(/*int in_argc, char* in_argv[]*/)
 {
-	if (!__main_arguments(in_argc, in_argv))
-		return 0;
+	/*if (!__main_arguments(in_argc, in_argv))
+		return 0;*/
 
-	/*__state.meshFile = devMFile;
+	__state.meshFile = devMFile;
 	__state.meshtype = EMeshType::FBX;
 	__state.meshScale = 0.01f;
 	__state.texFile = devTFile;
-	__state.bFlipTexture = true;*/
+	__state.bFlipTexture = true;
 
 	if (!__init())
 		return -1;
@@ -582,9 +586,11 @@ int main(int in_argc, char* in_argv[])
 	mesh.LoadMesh(__state.meshFile.c_str(), __state.meshtype, __state.meshScale);
 	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
 		return -3;
-	__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false);
 	std::map<char, BMuv> textmap;
-	GetMap(textmap);
+	if (!__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false))
+		std::cout << "Failed to load text." << std::endl;
+	else
+		GetMap(textmap);
 	
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
@@ -598,6 +604,7 @@ int main(int in_argc, char* in_argv[])
 	const GLint UNIFORM_VIEW = glGetUniformLocation(__state.shaderProgramMesh, "view");
 	const GLint UNIFORM_PROJECTION = glGetUniformLocation(__state.shaderProgramMesh, "projection");
 	const GLint UNIFORM_LINE = glGetUniformLocation(__state.shaderProgramText, "line");
+	const GLint UNIFORM_TEXTY = glGetUniformLocation(__state.shaderProgramText, "textY");
 
 	//__state.previousTime = glfwGetTime();
 
@@ -622,6 +629,7 @@ int main(int in_argc, char* in_argv[])
 		glUseProgram(__state.shaderProgramText);
 		UIText textline1(__state.mainWindowWidth, __state.mainWindowHeight);
 		UIText textline2(__state.mainWindowWidth, __state.mainWindowHeight);
+		glUniform1f(UNIFORM_TEXTY, __state.textY);
 		const std::string FAR = std::to_string(__state.orthoFar);
 		const std::string MESHPOS = std::to_string(__state.camPosition.z);
 		glUniform1i(UNIFORM_LINE, 0);
