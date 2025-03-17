@@ -175,6 +175,7 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 			in_argc > i)
 		{
 			__state.filePath = in_argv[i + 1];
+			i++;
 		}
 		else if (0 == ::strcmp(in_argv[i], "-f"))
 			__state.bFlipTexture = false;
