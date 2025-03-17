@@ -28,7 +28,7 @@ From the command prompt: "meshtoimage -m path/meshfile -t path/texture" where bo
 
 Additional commands:  
 -s scale where default is 0.01.  
--f will flip the texture vertically.
+-f will flip the texture vertically.  
 -p path/outfile sets and creates new save path.
 
 Many of the prime candidates among mesh-files for this project are far too big, hence the default of 0.01 scale.  
