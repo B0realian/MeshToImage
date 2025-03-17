@@ -502,7 +502,9 @@ uniform sampler2D sampler;
 
 void main()
 {
-	frag_color = texture(sampler, TexCoord) * vec4(textColour, 1);
+	vec4 colour = texture(sampler, TexCoord) * vec4(textColour, 1);
+	if (colour.a < 0.1f) discard;
+	frag_color = colour;
 };
 )raw";
 	glShaderSource(fst, 1, &FRAGMENT_SHADER_TEXT, NULL);
