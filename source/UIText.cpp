@@ -72,11 +72,13 @@ void UIText::WriteLine(const std::string text, const std::map<char, BMuv> &textm
 		}
 
 		vertices.clear();
+		vertices.resize(text.size() * 4);
 		float quadWidth = 20.f / screenWidth;
 		float quadHeight = 36.f / screenHeight;
 		float zValue = 0.01f;
 
 		int it = 0;
+		int i = 0;
 		for (char c : text)
 		{
 			if (static_cast<int>(c) < 32 || static_cast<int>(c) > 126)
@@ -97,13 +99,17 @@ void UIText::WriteLine(const std::string text, const std::map<char, BMuv> &textm
 			glm::vec2 bluv(charUV.bottomLeftU, charUV.bottomLeftV);
 
 			VertexText vertice1{ tlpos, tluv, colour };
-			vertices.push_back(vertice1);
+			vertices[i] = vertice1;
+			i++;
 			VertexText vertice2{ trpos, truv, colour };
-			vertices.push_back(vertice2);
+			vertices[i] = vertice2;
+			i++;
 			VertexText vertice3{ brpos, bruv, colour };
-			vertices.push_back(vertice3);
+			vertices[i] = vertice3;
+			i++;
 			VertexText vertice4{ blpos, bluv, colour };
-			vertices.push_back(vertice4);
+			vertices[i] = vertice4;
+			i++;
 
 			it++;
 		}
