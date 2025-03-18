@@ -373,7 +373,7 @@ static bool __init()
 	return true;
 }
 
-static void __shader_compilation_check(const GLuint in_shader, const EShaderType in_type)
+static bool __shader_compilation_check(const GLuint in_shader, const EShaderType in_type)
 {
 	int status = 0;
 	switch (in_type)
@@ -387,6 +387,7 @@ static void __shader_compilation_check(const GLuint in_shader, const EShaderType
 			std::string errorlog(length, ' ');
 			glGetShaderInfoLog(in_shader, length, &length, &errorlog[0]);
 			std::cout << "Shader failed to compile. " << errorlog << std::endl;
+			return false;
 		}
 		break;
 	case EShaderType::PROGRAM:
@@ -398,16 +399,21 @@ static void __shader_compilation_check(const GLuint in_shader, const EShaderType
 			std::string errorlog(length, ' ');
 			glGetProgramInfoLog(in_shader, length, &length, &errorlog[0]);
 			std::cout << "Shader Program Linker failure. " << errorlog << std::endl;
+			return false;
 		}
 		break;
 	default:
 		std::cout << "Shader Compilation Check misuse." << std::endl;
+		return false;
 		break;
 	}
+
+	return true;
 }
 
-static void __compile_shaders()
+static bool __compile_shaders()
 {
+	bool bReturnValue = true;
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	
 	const char* VERTEX_SHADER_MESH = R"foo(
@@ -431,7 +437,8 @@ void main()
 	glShaderSource(vs, 1, &VERTEX_SHADER_MESH, NULL);
 	
 	glCompileShader(vs);
-	__shader_compilation_check(vs, EShaderType::SHADER);
+	if (!__shader_compilation_check(vs, EShaderType::SHADER))
+		bReturnValue = false;
 
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 		
@@ -451,13 +458,15 @@ void main()
 	glShaderSource(fs, 1, &FRAGMENT_SHADER_MESH, NULL);
 	
 	glCompileShader(fs);
-	__shader_compilation_check(fs, EShaderType::SHADER);
+	if (!__shader_compilation_check(fs, EShaderType::SHADER))
+		bReturnValue = false;
 
 	__state.shaderProgramMesh = glCreateProgram();
 	glAttachShader(__state.shaderProgramMesh, vs);
 	glAttachShader(__state.shaderProgramMesh, fs);
 	glLinkProgram(__state.shaderProgramMesh);
-	__shader_compilation_check(__state.shaderProgramMesh, EShaderType::PROGRAM);
+	if (!__shader_compilation_check(__state.shaderProgramMesh, EShaderType::PROGRAM))
+		bReturnValue = false;
 	glDetachShader(__state.shaderProgramMesh, vs);
 	glDetachShader(__state.shaderProgramMesh, fs);
 
@@ -488,7 +497,8 @@ void main()
 )raw";
 	glShaderSource(vst, 1, &VERTEX_SHADER_TEXT, NULL);
 	glCompileShader(vst);
-	__shader_compilation_check(vst, EShaderType::SHADER);
+	if (!__shader_compilation_check(vst, EShaderType::SHADER))
+		bReturnValue = false;
 
 	GLuint fst = glCreateShader(GL_FRAGMENT_SHADER);
 	const char* FRAGMENT_SHADER_TEXT = R"raw(
@@ -510,18 +520,22 @@ void main()
 )raw";
 	glShaderSource(fst, 1, &FRAGMENT_SHADER_TEXT, NULL);
 	glCompileShader(fst);
-	__shader_compilation_check(fst, EShaderType::SHADER);
+	if (!__shader_compilation_check(fst, EShaderType::SHADER))
+		bReturnValue = false;
 
 	__state.shaderProgramText = glCreateProgram();
 	glAttachShader(__state.shaderProgramText, vst);
 	glAttachShader(__state.shaderProgramText, fst);
 	glLinkProgram(__state.shaderProgramText);
-	__shader_compilation_check(__state.shaderProgramText, EShaderType::PROGRAM);
+	if (!__shader_compilation_check(__state.shaderProgramText, EShaderType::PROGRAM))
+		bReturnValue = false;
 	glDetachShader(__state.shaderProgramText, vst);
 	glDetachShader(__state.shaderProgramText, fst);
 
 	glDeleteShader(fst);
 	glDeleteShader(vst);
+
+	return bReturnValue;
 }
 
 static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& projection)
@@ -594,13 +608,15 @@ int main(/*int in_argc, char* in_argv[]*/)
 		std::cout << "Failed to load text." << std::endl;
 	else
 		GetMap(textmap);
+
+	UIText textline(__state.mainWindowWidth, __state.mainWindowHeight);
 	
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
 	glfwSetWindowTitle(__state.mainWindow, outs.str().c_str());
 	
-	//FIXME: abort on failure?
-	__compile_shaders();
+	if (!__compile_shaders())
+		return -2;
 
 	//cache uniform locations locally
 	const GLint UNIFORM_MODEL = glGetUniformLocation(__state.shaderProgramMesh, "model");
@@ -630,18 +646,16 @@ int main(/*int in_argc, char* in_argv[]*/)
 
 		__state.bmText.Bind();
 		glUseProgram(__state.shaderProgramText);
-		UIText textline1(__state.mainWindowWidth, __state.mainWindowHeight);
-		UIText textline2(__state.mainWindowWidth, __state.mainWindowHeight);
 		glUniform1f(UNIFORM_TEXTY, __state.textY);
 		const std::string FAR = std::to_string(__state.orthoFar);
 		const std::string MESHPOS = std::to_string(__state.camPosition.z);
 		glUniform1i(UNIFORM_LINE, 0);
 		if (__state.bOrthographic)
-			textline1.WriteLine("Far render: " + FAR, textmap, ETextColour::YELLOW);
+			textline.WriteLine("Far render: " + FAR, textmap, ETextColour::YELLOW);
 		else
-			textline1.WriteLine("Far render: 100", textmap, ETextColour::GREEN);
+			textline.WriteLine("Far render: 100", textmap, ETextColour::GREEN);
 		glUniform1i(UNIFORM_LINE, 1);
-		textline2.WriteLine("Mesh Z-position: " + MESHPOS, textmap, ETextColour::YELLOW);
+		textline.WriteLine("Mesh Z-position: " + MESHPOS, textmap, ETextColour::YELLOW);
 		__state.bmText.Unbind();
 
 		glfwSwapBuffers(__state.mainWindow);

@@ -2,4 +2,4 @@
 
 struct BMuv;
 
-void GetMap(std::map<char, BMuv>& bmuv);
+void GetMap(std::map<char, BMuv> &bmuv);

@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "VertexN.h"
 
-void GetMap(std::map<char, BMuv>& bmuv)
+void GetMap(std::map<char, BMuv> &bmuv)
 {
+	assert(bmuv);
+	bmuv.clear();
 	int asciiValue = 32;
 	int tableWidth = 32;
 	int tableHeight = 3;
@@ -22,7 +24,7 @@ void GetMap(std::map<char, BMuv>& bmuv)
 			tempbmuv.bottomRightV = static_cast<float>(i + 1) / tableHeight;
 
 			bmuv.insert({ c, tempbmuv });
-
+			
 			asciiValue++;
 		}
 	}

@@ -1,7 +1,5 @@
 #pragma once
-#include <string>
 #include <vector>
-#include <map>
 
 enum class ETextColour;
 struct VertexText;
@@ -16,8 +14,9 @@ public:
 	void WriteLine(const std::string text, const std::map<char, BMuv> &textmap, const ETextColour in_colour);
 
 private:
-	void LoadBuffers(const std::vector<VertexText>& in);
+	void CreateBuffers();
 
+	std::vector<VertexText> vertices;
 	uint32_t vao = 0;
 	uint32_t vbo = 0;
 	uint32_t screenWidth;
