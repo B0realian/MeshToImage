@@ -14,14 +14,10 @@ void GetMap(std::map<char, BMuv> &bmuv)
 		{
 			char c = char(asciiValue);
 			BMuv tempbmuv;
-			tempbmuv.topLeftU = static_cast<float>(j) / tableWidth;
-			tempbmuv.topLeftV = static_cast<float>(i) / tableHeight;
-			tempbmuv.topRightU = static_cast<float>(j + 1) / tableWidth;
-			tempbmuv.topRightV = static_cast<float>(i) / tableHeight;
-			tempbmuv.bottomLeftU = static_cast<float>(j) / tableWidth;
-			tempbmuv.bottomLeftV = static_cast<float>(i + 1) / tableHeight;
-			tempbmuv.bottomRightU = static_cast<float>(j + 1) / tableWidth;
-			tempbmuv.bottomRightV = static_cast<float>(i + 1) / tableHeight;
+			tempbmuv.topLeftUV = { static_cast<float>(j) / tableWidth , static_cast<float>(i) / tableHeight };
+			tempbmuv.topRightUV = { static_cast<float>(j + 1) / tableWidth , static_cast<float>(i) / tableHeight };
+			tempbmuv.bottomLeftUV = { static_cast<float>(j) / tableWidth , static_cast<float>(i + 1) / tableHeight };
+			tempbmuv.bottomRightUV = { static_cast<float>(j + 1) / tableWidth , static_cast<float>(i + 1) / tableHeight };
 
 			bmuv.insert({ c, tempbmuv });
 			

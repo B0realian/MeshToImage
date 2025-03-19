@@ -24,12 +24,8 @@ struct VertexText
 
 struct BMuv
 {
-	float topLeftU;
-	float topLeftV;
-	float topRightU;
-	float topRightV;
-	float bottomLeftU;
-	float bottomLeftV;
-	float bottomRightU;
-	float bottomRightV;
+	glm::vec2 topLeftUV;
+	glm::vec2 topRightUV;
+	glm::vec2 bottomLeftUV;
+	glm::vec2 bottomRightUV;
 };

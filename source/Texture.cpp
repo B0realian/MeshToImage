@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <filesystem>
 
 //this is included here and not in stdafx.h (pre-compiled header) in order to respect how SBT_IMAGE is doing code generation (for implementation)
 #define STB_IMAGE_IMPLEMENTATION

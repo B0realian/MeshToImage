@@ -6,7 +6,7 @@ struct Vertex2;
 class Mesh
 {
 public:
-
+	Mesh();
 	~Mesh();
 
 	bool LoadMesh(const char* filename, const EMeshType filetype, const float in_mesh_scale);

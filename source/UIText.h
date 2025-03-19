@@ -9,8 +9,8 @@ class UIText
 public:
 	UIText(const uint32_t in_width, const uint32_t in_height);
 	~UIText();
-	void WriteLine(const std::string text, const std::map<char, BMuv> &textmap);
-	void WriteLine(const std::string text, const std::map<char, BMuv> &textmap, const ETextColour in_colour);
+	void WriteLine(const std::string &text, const std::map<char, BMuv> &textmap);
+	void WriteLine(const std::string &text, const std::map<char, BMuv> &textmap, const ETextColour in_colour);
 
 private:
 	void CreateBuffers();

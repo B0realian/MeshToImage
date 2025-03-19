@@ -16,6 +16,22 @@
 #pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-md.lib")
 #endif
 
+Mesh::Mesh()
+{
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)0);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)(3 * sizeof(GLfloat)));
+
+	glBindVertexArray(0);
+}
+
 Mesh::~Mesh()
 {
 	glDeleteVertexArrays(1, &vao);
@@ -505,19 +521,9 @@ bool Mesh::FbxFile(const char* filename, const float in_mesh_scale)
 
 void Mesh::LoadBuffers(const std::vector<Vertex2>& in)
 {
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, in.size() * sizeof(Vertex2), &in[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)0);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2), (GLvoid*)(3 * sizeof(GLfloat)));
-
 	glBindVertexArray(0);
 }
 
