@@ -1,5 +1,4 @@
 #pragma once
-
 enum class EMeshType;
 struct Vertex2;
 
@@ -13,6 +12,7 @@ public:
 	void DrawTriangles();
 
 	int32_t triangles = 0;
+	std::string relative_texture_path;
 
 private:
 

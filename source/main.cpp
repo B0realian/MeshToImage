@@ -14,18 +14,24 @@
 //IMMUTABLE
 //IMMUTABLE
 const char* mainWindowTitle = "Mesh to Image";
+const size_t BUFFER_SIZE = 190;
 // DEBUGGING/TESTING STRINGS:
 const char* testObj = "test/test.obj";
 const char* testFbx = "test/test.fbx";
 const char* testGltf = "test/test_split.gltf";
 const char* testGltfEmb = "test/test_embedded.gltf";
 const char* testTexture = "textures/test.jpg";
-const char* devMFile = "megascans/Lava_Outcrop.fbx";
-const char* devTFile = "megascans/Lava_Outcrop.jpg";
+const char* devMFile = "megascans\\Sandstone_Rock.fbx";
+const char* devTFile = "megascans\\Textures\\T_wftnffyva_1K_B.jpg";
 //IMMUTABLE
 //IMMUTABLE
 //IMMUTABLE
 //IMMUTABLE
+
+// Poorly implemented as it relies on textbuffer and textmap to be named as such. Macros are fun and idiotic at the same time...
+#define WRITE(text, f, row, colour)			glUniform1i(UNIFORM_LINE, row);\
+											snprintf(textbuffer, BUFFER_SIZE, text, f);\
+											textline.WriteLine(textbuffer, textmap, ETextColour:: colour);
 
 //MUTABLE
 //MUTABLE
@@ -411,6 +417,46 @@ static bool __shader_compilation_check(const GLuint in_shader, const EShaderType
 	return true;
 }
 
+static bool __find_texture(Mesh &in_mesh)
+{
+	if (__state.meshtype == EMeshType::GLTF)
+	{
+		if (__state.meshFile.find_last_of('/') != std::string::npos)
+			__state.texFile = __state.meshFile.substr(0, __state.meshFile.find_last_of('/') + 1) + in_mesh.relative_texture_path;
+		else if (__state.meshFile.find_last_of('\\') != std::string::npos)
+			__state.texFile = __state.meshFile.substr(0, __state.meshFile.find_last_of('\\') + 1) + in_mesh.relative_texture_path;
+		__state.bFlipTexture = false;
+		std::cout << "Texture path: " << __state.texFile << std::endl;
+	}
+	else
+	{
+		std::string meshname = __state.meshFile.substr(__state.meshFile.find_last_of('\\') + 1, __state.meshFile.find('.') - 1 - __state.meshFile.find_last_of('\\'));
+		std::string meshpath = std::filesystem::current_path().string() + '\\' + __state.meshFile.substr(0, __state.meshFile.find_last_of('\\') + 1);
+
+		const std::filesystem::path tex_path{ meshpath };
+		for (std::filesystem::directory_entry const &entry : std::filesystem::directory_iterator{ tex_path })
+		{
+			std::string entrypath = entry.path().string();
+			if (entrypath.find(meshname) != std::string::npos)
+				if (entrypath.find("jpg") != std::string::npos ||
+					entrypath.find("jpeg") != std::string::npos ||
+					entrypath.find("png") != std::string::npos ||
+					entrypath.find("tga") != std::string::npos ||
+					entrypath.find("gif") != std::string::npos)
+				{
+					__state.texFile = entrypath;
+					std::cout << "Texture path: " << __state.texFile << std::endl;
+					break;
+				}
+		}
+	}
+
+	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
+		return false;
+
+	return true;
+}
+
 static bool __compile_shaders()
 {
 	bool bReturnValue = true;
@@ -574,7 +620,6 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 
 	//__state.previousTime = currentTime;
 }
-
 //END FILE LOCAL FUNCTIONS
 //END FILE LOCAL FUNCTIONS
 //END FILE LOCAL FUNCTIONS
@@ -590,19 +635,20 @@ int main(int in_argc, char* in_argv[])
 	if (!__main_arguments(in_argc, in_argv))
 		return 0;
 
-	/*__state.meshFile = devMFile;
-	__state.meshtype = EMeshType::FBX;
-	__state.meshScale = 0.01f;
-	__state.texFile = devTFile;
-	__state.bFlipTexture = true;*/
+	//__state.meshFile = devMFile;
+	////__state.meshtype = EMeshType::GLTF;
+	//__state.meshScale = 0.01f;
+	////__state.texFile = devTFile;
+	//__state.bFlipTexture = true;
 
 	if (!__init())
 		return -1;
 
 	Mesh mesh;
 	mesh.LoadMesh(__state.meshFile.c_str(), __state.meshtype, __state.meshScale);
-	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
+	if (!__find_texture(mesh))
 		return -3;
+
 	std::map<char, BMuv> textmap;
 	if (!__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false))
 		std::cout << "Failed to load text." << std::endl;
@@ -616,7 +662,7 @@ int main(int in_argc, char* in_argv[])
 	glfwSetWindowTitle(__state.mainWindow, outs.str().c_str());
 	
 	if (!__compile_shaders())
-		return -2;
+		return -4;
 
 	//cache uniform locations locally
 	const GLint UNIFORM_MODEL = glGetUniformLocation(__state.shaderProgramMesh, "model");
@@ -645,17 +691,14 @@ int main(int in_argc, char* in_argv[])
 		__state.texture.Unbind();
 
 		__state.bmText.Bind();
+		char textbuffer[BUFFER_SIZE];
 		glUseProgram(__state.shaderProgramText);
 		glUniform1f(UNIFORM_TEXTY, __state.textY);
-		const std::string FAR = std::to_string(__state.orthoFar);
-		const std::string MESHPOS = std::to_string(__state.camPosition.z);
-		glUniform1i(UNIFORM_LINE, 0);
 		if (__state.bOrthographic)
-			textline.WriteLine("Far render: " + FAR, textmap, ETextColour::YELLOW);
+			{WRITE("Far render: %f", __state.orthoFar, 0, YELLOW);	}
 		else
-			textline.WriteLine("Far render: 100", textmap, ETextColour::GREEN);
-		glUniform1i(UNIFORM_LINE, 1);
-		textline.WriteLine("Mesh Z-position: " + MESHPOS, textmap, ETextColour::YELLOW);
+			{WRITE("Far render: 100", NULL, 0, GREEN);	}
+		WRITE("Mesh Z-position: %f", __state.camPosition.z, 1, YELLOW); 
 		__state.bmText.Unbind();
 
 		glfwSwapBuffers(__state.mainWindow);

@@ -11,6 +11,7 @@ public:
 	~UIText();
 	void WriteLine(const std::string &text, const std::map<char, BMuv> &textmap);
 	void WriteLine(const std::string &text, const std::map<char, BMuv> &textmap, const ETextColour in_colour);
+	void WriteLine(const char* text, const std::map<char, BMuv>& textmap, const ETextColour in_colour);
 
 private:
 	void CreateBuffers();

@@ -44,7 +44,12 @@ void UIText::WriteLine(const std::string &text, const std::map<char, BMuv> &text
 	WriteLine(text, textmap, ETextColour::None);
 }
 
-void UIText::WriteLine(const std::string &text, const std::map<char, BMuv> &textmap, const ETextColour in_colour)
+void UIText::WriteLine(const std::string& text, const std::map<char, BMuv>& textmap, const ETextColour in_colour)
+{
+	WriteLine(text.c_str(), textmap, in_colour);
+}
+
+void UIText::WriteLine(const char* text, const std::map<char, BMuv> &textmap, const ETextColour in_colour)
 {
 	glm::vec3 colour;
 	switch (in_colour)
@@ -68,17 +73,19 @@ void UIText::WriteLine(const std::string &text, const std::map<char, BMuv> &text
 		colour = glm::vec3{ 1.f, 1.f, 1.f };
 		break;
 	}
-
+	const size_t TEXTLENGTH = std::strlen(text);
 	vertices.clear();
-	vertices.resize(text.size() * 4);
+	vertices.resize(TEXTLENGTH * 4);
 	const float quadWidth = 20.f / screenWidth;
 	const float quadHeight = 36.f / screenHeight;
 	const float zValue = 0.01f;
 
 	int pos_itr = 0;
 	int v_itr = 0;
-	for (char c : text)
+	for (int i = 0; i < TEXTLENGTH; i++)
 	{
+		char c = text[i];
+
 		if (static_cast<int>(c) < 32 || static_cast<int>(c) > 126)
 			c = '#';
 

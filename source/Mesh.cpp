@@ -143,7 +143,11 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 			txcoordAccessorByteOffset = json["accessors"][txcoordIndex]["byteOffset"];
 		if (json["accessors"][indicesIndex].contains("byteOffset"))
 			indicesAccessorByteOffset = json["accessors"][indicesIndex]["byteOffset"];
-
+		if (json.contains("images"))
+		{
+			uint32_t textureIndex = json["materials"][0]["pbrMetallicRoughness"]["baseColorTexture"]["index"];
+			relative_texture_path = json["images"][textureIndex]["uri"];
+		}
 
 		if (uri.find(".bin") != std::string::npos)		// gltf with separate .bin containing mesh data
 		{
