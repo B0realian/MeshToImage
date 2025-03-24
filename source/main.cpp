@@ -84,111 +84,111 @@ static struct state_t
 //BEGIN FILE LOCAL FUNCTIONS
 //note that we can get away without using std::string / allocated copies
 //conceptually this is also cleaner as we are reading the immutable inputs to the program
-static bool __main_arguments(int in_argc, char* in_argv[])
-{
-	if (in_argc < 2)
-	{
-		std::cout << "User Instructions:\n";
-		std::cout << "\n";
-		std::cout << "tldr: -m mesh.gltf       (loads mesh file).\n";
-		std::cout << "      -t texture.jpg     (loads texture).\n";
-		std::cout << "      -s 1               (sets scale to 1).\n";
-		std::cout << "      -f                 (flips texture).\n";
-		std::cout << "      -p save/path       (changes save dir from default).\n";
-		std::cout << "To load a mesh, you must specify both a mesh-file and a texture-file (case sensitive) in the following manner:\n";
-		std::cout << "meshtoimage -m pathto/mesh.file -t pathto/texture.file\n";
-		std::cout << ".obj and .gltf works with portable version, full version adds .fbx.\n";
-		std::cout << "The program will, by default, scale meshes by 0.01 (i.e. 1:100) since I noticed that a lot of meshes are too big for an OpenGL renderer.\n";
-		std::cout << "To change scale, add -s followed by desired scale, i.e. -s 1, or -s 0.1.\n";
-		std::cout << "Depending on mesh, the texture may need flipping. If you know you have the right texture but it looks broken, add -f.\n";
-		std::cout << "\n";
-		std::cout << "In program navigation:\n";
-		std::cout << "\n";
-		std::cout << "Hold left mouse button and move mouse: rotate mesh.\n";
-		std::cout << "Hold right mouse button and move mouse: zoom mesh.\n";
-		std::cout << "V to toggle wireframe mode.\n";
-		std::cout << "Spacebar to toggle betweem orthographic and perspective view. (Program starts in perspective view).\n";
-		std::cout << "WASD to pan camera in orthographic mode.\n";
-		std::cout << "Q/E for orthographic zoom in/out. (Mouse zoom only works in perspective view).\n";
-		std::cout << "Z/X to limit/extend depth of field in orthographic mode. (Decreases/increases far render limit).\n";
-		std::cout << "Return to take a snapshot. Image filenames will increment while program is running.\n";
-		std::cout << "Please note: for best result, make sure far render limit is close to the mesh.\n";
-		return false;
-	}
-
-	bool bMesh = false;
-	bool bTexture = true;
-
-	int i = 1;
-	while (i < in_argc)
-	{
-		/*if (
-			0 == ::strcmp(in_argv[i], "-m") &&
-			in_argc > i
-			)
-		{
-			__state.meshFile = in_argv[i + 1];
-			if (__state.meshFile.find(".gltf") != std::string::npos)
-				__state.meshtype = EMeshType::GLTF;
-			else if (__state.meshFile.find(".obj") != std::string::npos)
-				__state.meshtype = EMeshType::OBJ;
-			else if (__state.meshFile.find(".fbx") != std::string::npos)
-				__state.meshtype = EMeshType::FBX;
-			else
-			{
-				std::cout << "Unsupported mesh filetype.\n";
-				return false;
-			}
-			bMesh = true;
-			i++;
-		}*/
-		/*else if (
-			0 == ::strcmp(in_argv[i], "-t") &&
-			in_argc > i
-			)
-		{
-			__state.texFile = in_argv[i + 1];
-			if (
-				__state.texFile.find(".jpg") != std::string::npos ||
-				__state.texFile.find(".jpeg") != std::string::npos ||
-				__state.texFile.find(".png") != std::string::npos ||
-				__state.texFile.find(".tga") != std::string::npos ||
-				__state.texFile.find(".gif") != std::string::npos
-				)
-				bTexture = true;
-			else
-			{
-				std::cout << "Unsupported texture filetype.\n";
-				return false;
-			}
-			i++;
-		}*/
-		/*else if (
-			0 == ::strcmp(in_argv[i], "-s") &&
-			in_argc > i
-			)
-		{
-			if (!(__state.meshScale = (float)::atof(in_argv[i + 1])))
-			{
-				std::cout << "Failed to convert scale argument to float.\n";
-				return false;
-			}
-			i++;
-		}
-		else if (0 == ::strcmp(in_argv[i], "-p") &&
-			in_argc > i)
-		{
-			__state.filePath = in_argv[i + 1];
-			i++;
-		}
-		else if (0 == ::strcmp(in_argv[i], "-f"))
-			__state.bFlipTexture = false;
-
-		i++;*/
-	}
-
-	return (bMesh && bTexture);
-}
+//static bool __main_arguments(int in_argc, char* in_argv[])
+//{
+//	if (in_argc < 2)
+//	{
+//		std::cout << "User Instructions:\n";
+//		std::cout << "\n";
+//		std::cout << "tldr: -m mesh.gltf       (loads mesh file).\n";
+//		std::cout << "      -t texture.jpg     (loads texture).\n";
+//		std::cout << "      -s 1               (sets scale to 1).\n";
+//		std::cout << "      -f                 (flips texture).\n";
+//		std::cout << "      -p save/path       (changes save dir from default).\n";
+//		std::cout << "To load a mesh, you must specify both a mesh-file and a texture-file (case sensitive) in the following manner:\n";
+//		std::cout << "meshtoimage -m pathto/mesh.file -t pathto/texture.file\n";
+//		std::cout << ".obj and .gltf works with portable version, full version adds .fbx.\n";
+//		std::cout << "The program will, by default, scale meshes by 0.01 (i.e. 1:100) since I noticed that a lot of meshes are too big for an OpenGL renderer.\n";
+//		std::cout << "To change scale, add -s followed by desired scale, i.e. -s 1, or -s 0.1.\n";
+//		std::cout << "Depending on mesh, the texture may need flipping. If you know you have the right texture but it looks broken, add -f.\n";
+//		std::cout << "\n";
+//		std::cout << "In program navigation:\n";
+//		std::cout << "\n";
+//		std::cout << "Hold left mouse button and move mouse: rotate mesh.\n";
+//		std::cout << "Hold right mouse button and move mouse: zoom mesh.\n";
+//		std::cout << "V to toggle wireframe mode.\n";
+//		std::cout << "Spacebar to toggle betweem orthographic and perspective view. (Program starts in perspective view).\n";
+//		std::cout << "WASD to pan camera in orthographic mode.\n";
+//		std::cout << "Q/E for orthographic zoom in/out. (Mouse zoom only works in perspective view).\n";
+//		std::cout << "Z/X to limit/extend depth of field in orthographic mode. (Decreases/increases far render limit).\n";
+//		std::cout << "Return to take a snapshot. Image filenames will increment while program is running.\n";
+//		std::cout << "Please note: for best result, make sure far render limit is close to the mesh.\n";
+//		return false;
+//	}
+//
+//	bool bMesh = false;
+//	bool bTexture = true;
+//
+//	int i = 1;
+//	while (i < in_argc)
+//	{
+//		/*if (
+//			0 == ::strcmp(in_argv[i], "-m") &&
+//			in_argc > i
+//			)
+//		{
+//			__state.meshFile = in_argv[i + 1];
+//			if (__state.meshFile.find(".gltf") != std::string::npos)
+//				__state.meshtype = EMeshType::GLTF;
+//			else if (__state.meshFile.find(".obj") != std::string::npos)
+//				__state.meshtype = EMeshType::OBJ;
+//			else if (__state.meshFile.find(".fbx") != std::string::npos)
+//				__state.meshtype = EMeshType::FBX;
+//			else
+//			{
+//				std::cout << "Unsupported mesh filetype.\n";
+//				return false;
+//			}
+//			bMesh = true;
+//			i++;
+//		}*/
+//		/*else if (
+//			0 == ::strcmp(in_argv[i], "-t") &&
+//			in_argc > i
+//			)
+//		{
+//			__state.texFile = in_argv[i + 1];
+//			if (
+//				__state.texFile.find(".jpg") != std::string::npos ||
+//				__state.texFile.find(".jpeg") != std::string::npos ||
+//				__state.texFile.find(".png") != std::string::npos ||
+//				__state.texFile.find(".tga") != std::string::npos ||
+//				__state.texFile.find(".gif") != std::string::npos
+//				)
+//				bTexture = true;
+//			else
+//			{
+//				std::cout << "Unsupported texture filetype.\n";
+//				return false;
+//			}
+//			i++;
+//		}*/
+//		/*else if (
+//			0 == ::strcmp(in_argv[i], "-s") &&
+//			in_argc > i
+//			)
+//		{
+//			if (!(__state.meshScale = (float)::atof(in_argv[i + 1])))
+//			{
+//				std::cout << "Failed to convert scale argument to float.\n";
+//				return false;
+//			}
+//			i++;
+//		}
+//		else if (0 == ::strcmp(in_argv[i], "-p") &&
+//			in_argc > i)
+//		{
+//			__state.filePath = in_argv[i + 1];
+//			i++;
+//		}
+//		else if (0 == ::strcmp(in_argv[i], "-f"))
+//			__state.bFlipTexture = false;
+//
+//		i++;*/
+//	}
+//
+//	return (bMesh && bTexture);
+//}
 
 static bool __find_mesh_files()
 {
