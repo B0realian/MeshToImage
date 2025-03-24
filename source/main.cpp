@@ -16,11 +16,6 @@
 const char* mainWindowTitle = "Mesh to Image";
 const size_t BUFFER_SIZE = 190;
 // DEBUGGING/TESTING STRINGS:
-const char* testObj = "test/test.obj";
-const char* testFbx = "test/test.fbx";
-const char* testGltf = "test/test_split.gltf";
-const char* testGltfEmb = "test/test_embedded.gltf";
-const char* testTexture = "textures/test.jpg";
 const char* devMFile = "megascans\\Sandstone_Rock.fbx";
 const char* devTFile = "megascans\\Textures\\T_wftnffyva_1K_B.jpg";
 //IMMUTABLE
@@ -41,7 +36,10 @@ static struct state_t
 {
 	GLFWwindow* mainWindow = NULL;
 
-	std::string meshFile = "";
+	Mesh* meshptr;
+	std::vector<std::pair<std::string, EMeshType>> meshFiles;
+	uint16_t meshFile = 0;
+	uint16_t meshFileAmount = 0;
 	std::string texFile = "";
 	std::string filePath = "captures";
 
@@ -119,12 +117,12 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 	}
 
 	bool bMesh = false;
-	bool bTexture = false;
+	bool bTexture = true;
 
 	int i = 1;
 	while (i < in_argc)
 	{
-		if (
+		/*if (
 			0 == ::strcmp(in_argv[i], "-m") &&
 			in_argc > i
 			)
@@ -143,8 +141,8 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 			}
 			bMesh = true;
 			i++;
-		}
-		else if (
+		}*/
+		/*else if (
 			0 == ::strcmp(in_argv[i], "-t") &&
 			in_argc > i
 			)
@@ -164,8 +162,8 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 				return false;
 			}
 			i++;
-		}
-		else if (
+		}*/
+		/*else if (
 			0 == ::strcmp(in_argv[i], "-s") &&
 			in_argc > i
 			)
@@ -186,44 +184,80 @@ static bool __main_arguments(int in_argc, char* in_argv[])
 		else if (0 == ::strcmp(in_argv[i], "-f"))
 			__state.bFlipTexture = false;
 
-		//	TESTING AND DEBUGGING COMMANDS: WILL NOT WORK OUTSIDE DEVELOPER ENVIRONMENT STRUCTURE
-		else if (0 == ::strcmp(in_argv[i], "-to"))
-		{
-			__state.meshFile = testObj;
-			__state.texFile = testTexture;
-			__state.meshScale = 1.f;
-			__state.meshtype = EMeshType::OBJ;
-			return true;
-		}
-		else if (0 == ::strcmp(in_argv[i], "-tf"))
-		{
-			__state.meshFile = testFbx;
-			__state.texFile = testTexture;
-			__state.meshScale = 1.f;
-			__state.meshtype = EMeshType::FBX;
-			return true;
-		}
-		else if (0 == ::strcmp(in_argv[i], "-tg"))
-		{
-			__state.meshFile = testGltf;
-			__state.texFile = testTexture;
-			__state.meshScale = 1.f;
-			__state.meshtype = EMeshType::GLTF;
-			return true;
-		}
-		else if (0 == ::strcmp(in_argv[i], "-tge"))
-		{
-			__state.meshFile = testGltfEmb;
-			__state.texFile = testTexture;
-			__state.meshScale = 1.f;
-			__state.meshtype = EMeshType::GLTF;
-			return true;
-		}
-
-		i++;
+		i++;*/
 	}
 
 	return (bMesh && bTexture);
+}
+
+static bool __find_mesh_files()
+{
+	for (std::filesystem::directory_entry const& entry : std::filesystem::recursive_directory_iterator{ std::filesystem::current_path() })
+	{
+		const std::string entrypath = entry.path().string();
+		const std::string entryext = entry.path().extension().string();
+		if (entryext == ".gltf")
+		{
+			__state.meshFiles.push_back({ entrypath, EMeshType::GLTF });
+		}
+		else if (entryext == ".fbx")
+		{
+			__state.meshFiles.push_back({ entrypath, EMeshType::FBX });
+		}
+		else if (entryext == ".obj")
+		{
+
+		}
+	}
+
+	__state.meshFileAmount = __state.meshFiles.size();
+	std::cout << "Number of files found: " << __state.meshFileAmount << std::endl;
+	return (__state.meshFileAmount > 0);
+}
+
+static bool __find_texture(Mesh& in_mesh)
+{
+	std::cout << "Relative texture path: " << in_mesh.relative_texture_path << std::endl;
+	if (in_mesh.relative_texture_path == "")
+	{
+		std::string meshname = __state.meshFiles[__state.meshFile].first.substr(__state.meshFiles[__state.meshFile].first.find_last_of('\\') + 1,
+			__state.meshFiles[__state.meshFile].first.find('.') - 1 - __state.meshFiles[__state.meshFile].first.find_last_of('\\'));
+		std::string meshpath = __state.meshFiles[__state.meshFile].first.substr(0, __state.meshFiles[__state.meshFile].first.find_last_of('\\') + 1);
+
+		std::cout << "Mesh name :" << meshname << ", Mesh path: " << meshpath << std::endl;
+		const std::filesystem::path tex_path{ meshpath };
+		for (std::filesystem::directory_entry const& entry : std::filesystem::directory_iterator{ tex_path })
+		{
+			const std::string entrypath = entry.path().string();
+			if (entrypath.find(meshname) != std::string::npos)
+				if (entrypath.find("jpg") != std::string::npos ||
+					entrypath.find("jpeg") != std::string::npos ||
+					entrypath.find("png") != std::string::npos ||
+					entrypath.find("tga") != std::string::npos ||
+					entrypath.find("gif") != std::string::npos)
+				{
+					__state.texFile = entrypath;
+					std::cout << "Texture file: " << __state.texFile << std::endl;
+					break;
+				}
+		}
+		if (__state.meshFiles[__state.meshFile].second != EMeshType::GLTF)
+			__state.bFlipTexture = true;
+	}
+	else
+	{
+		if (__state.meshFiles[__state.meshFile].first.find_last_of('/') != std::string::npos)
+			__state.texFile = __state.meshFiles[__state.meshFile].first.substr(0, __state.meshFiles[__state.meshFile].first.find_last_of('/') + 1) + in_mesh.relative_texture_path;
+		else if (__state.meshFiles[__state.meshFile].first.find_last_of('\\') != std::string::npos)
+			__state.texFile = __state.meshFiles[__state.meshFile].first.substr(0, __state.meshFiles[__state.meshFile].first.find_last_of('\\') + 1) + in_mesh.relative_texture_path;
+		__state.bFlipTexture = false;
+		std::cout << "Texture path: " << __state.texFile << std::endl;
+	}
+
+	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
+		return false;
+
+	return true;
 }
 
 static void __on_frame_buffer_size(GLFWwindow* in_window, int in_width, int in_height)
@@ -254,7 +288,7 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 	}
 	if (in_key == GLFW_KEY_ENTER && in_action == GLFW_PRESS)
 	{
-		__state.texture.SaveRaw(__state.mainWindowWidth, __state.mainWindowHeight, __state.captures, __state.meshFile, __state.filePath);
+		__state.texture.SaveRaw(__state.mainWindowWidth, __state.mainWindowHeight, __state.captures, __state.meshFiles[__state.meshFile].first, __state.filePath);
 		++__state.captures;
 		return;
 	}
@@ -272,6 +306,19 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 			__state.subjectOffset = glm::vec3(0.f, 0.f, 0.f);
 		}
 		return;
+	}
+
+	else if (in_key == GLFW_KEY_DOWN && in_action == GLFW_PRESS && __state.meshFile < (__state.meshFileAmount - 1))
+	{
+		__state.meshFile++;
+		__state.meshptr->LoadMesh(__state.meshFiles[__state.meshFile].first.c_str(), __state.meshFiles[__state.meshFile].second, __state.meshScale);
+		__find_texture(*__state.meshptr);
+	}
+	else if (in_key == GLFW_KEY_UP && in_action == GLFW_PRESS && __state.meshFile > 0)
+	{
+		__state.meshFile--;
+		__state.meshptr->LoadMesh(__state.meshFiles[__state.meshFile].first.c_str(), __state.meshFiles[__state.meshFile].second, __state.meshScale);
+		__find_texture(*__state.meshptr);
 	}
 
 	else if (
@@ -379,6 +426,8 @@ static bool __init()
 	return true;
 }
 
+
+
 static bool __shader_compilation_check(const GLuint in_shader, const EShaderType in_type)
 {
 	int status = 0;
@@ -413,46 +462,6 @@ static bool __shader_compilation_check(const GLuint in_shader, const EShaderType
 		return false;
 		break;
 	}
-
-	return true;
-}
-
-static bool __find_texture(Mesh &in_mesh)
-{
-	if (__state.meshtype == EMeshType::GLTF)
-	{
-		if (__state.meshFile.find_last_of('/') != std::string::npos)
-			__state.texFile = __state.meshFile.substr(0, __state.meshFile.find_last_of('/') + 1) + in_mesh.relative_texture_path;
-		else if (__state.meshFile.find_last_of('\\') != std::string::npos)
-			__state.texFile = __state.meshFile.substr(0, __state.meshFile.find_last_of('\\') + 1) + in_mesh.relative_texture_path;
-		__state.bFlipTexture = false;
-		std::cout << "Texture path: " << __state.texFile << std::endl;
-	}
-	else
-	{
-		std::string meshname = __state.meshFile.substr(__state.meshFile.find_last_of('\\') + 1, __state.meshFile.find('.') - 1 - __state.meshFile.find_last_of('\\'));
-		std::string meshpath = std::filesystem::current_path().string() + '\\' + __state.meshFile.substr(0, __state.meshFile.find_last_of('\\') + 1);
-
-		const std::filesystem::path tex_path{ meshpath };
-		for (std::filesystem::directory_entry const &entry : std::filesystem::directory_iterator{ tex_path })
-		{
-			std::string entrypath = entry.path().string();
-			if (entrypath.find(meshname) != std::string::npos)
-				if (entrypath.find("jpg") != std::string::npos ||
-					entrypath.find("jpeg") != std::string::npos ||
-					entrypath.find("png") != std::string::npos ||
-					entrypath.find("tga") != std::string::npos ||
-					entrypath.find("gif") != std::string::npos)
-				{
-					__state.texFile = entrypath;
-					std::cout << "Texture path: " << __state.texFile << std::endl;
-					break;
-				}
-		}
-	}
-
-	if (!__state.texture.LoadTexture(__state.texFile.c_str(), true, __state.bFlipTexture))
-		return false;
 
 	return true;
 }
@@ -630,22 +639,26 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 //ENTRYPOINT
 //ENTRYPOINT
 //ENTRYPOINT
-int main(int in_argc, char* in_argv[])
+int main(/*int in_argc, char* in_argv[]*/)
 {
-	if (!__main_arguments(in_argc, in_argv))
-		return 0;
+	/*if (!__main_arguments(in_argc, in_argv))
+		return 0;*/
 
 	//__state.meshFile = devMFile;
-	////__state.meshtype = EMeshType::GLTF;
-	//__state.meshScale = 0.01f;
-	////__state.texFile = devTFile;
+	//__state.meshtype = EMeshType::GLTF;
+	__state.meshScale = 0.01f;
+	//__state.texFile = devTFile;
 	//__state.bFlipTexture = true;
 
 	if (!__init())
 		return -1;
 
+	if (!__find_mesh_files())
+		return -2;
+
 	Mesh mesh;
-	mesh.LoadMesh(__state.meshFile.c_str(), __state.meshtype, __state.meshScale);
+	__state.meshptr = &mesh;
+	mesh.LoadMesh(__state.meshFiles[0].first.c_str(), __state.meshFiles[0].second, __state.meshScale);
 	if (!__find_texture(mesh))
 		return -3;
 
@@ -656,7 +669,8 @@ int main(int in_argc, char* in_argv[])
 		GetMap(textmap);
 
 	UIText textline(__state.mainWindowWidth, __state.mainWindowHeight);
-	
+	char textbuffer[BUFFER_SIZE];
+
 	std::ostringstream outs;
 	outs << std::fixed << mainWindowTitle << "  -  Triangles: " << mesh.triangles;
 	glfwSetWindowTitle(__state.mainWindow, outs.str().c_str());
@@ -687,18 +701,28 @@ int main(int in_argc, char* in_argv[])
 		glUniformMatrix4fv(UNIFORM_MODEL, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(UNIFORM_VIEW, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(UNIFORM_PROJECTION, 1, GL_FALSE, glm::value_ptr(projection));
-		mesh.DrawTriangles();
+		__state.meshptr->DrawTriangles();
 		__state.texture.Unbind();
 
 		__state.bmText.Bind();
-		char textbuffer[BUFFER_SIZE];
 		glUseProgram(__state.shaderProgramText);
 		glUniform1f(UNIFORM_TEXTY, __state.textY);
 		if (__state.bOrthographic)
 			{WRITE("Far render: %f", __state.orthoFar, 0, YELLOW);	}
 		else
 			{WRITE("Far render: 100", NULL, 0, GREEN);	}
-		WRITE("Mesh Z-position: %f", __state.camPosition.z, 1, YELLOW); 
+		WRITE("Mesh Z-position: %f", __state.camPosition.z, 1, YELLOW);
+		for (uint16_t i = 0; i < __state.meshFileAmount; i++)
+		{
+			if (i == __state.meshFile)
+			{
+				WRITE("%s", __state.meshFiles[i].first.c_str(), i + 3, YELLOW);
+			}
+			else
+			{
+				WRITE("%s", __state.meshFiles[i].first.c_str(), i + 3, BLUE);
+			}
+		}
 		__state.bmText.Unbind();
 
 		glfwSwapBuffers(__state.mainWindow);

@@ -49,6 +49,7 @@ void Mesh::DrawTriangles()
 
 bool Mesh::LoadMesh(const char* in_filename, const EMeshType in_filetype, const float in_mesh_scale)
 {
+	relative_texture_path = "";
 	switch (in_filetype)
 	{
 	case EMeshType::None:
