@@ -15,9 +15,6 @@
 //IMMUTABLE
 const char* mainWindowTitle = "Mesh to Image";
 const size_t BUFFER_SIZE = 190;
-// DEBUGGING/TESTING STRINGS:
-const char* devMFile = "megascans\\Sandstone_Rock.fbx";
-const char* devTFile = "megascans\\Textures\\T_wftnffyva_1K_B.jpg";
 //IMMUTABLE
 //IMMUTABLE
 //IMMUTABLE
@@ -72,125 +69,11 @@ static struct state_t
 	bool bFlipTexture = true;
 	bool bOrthographic = false;
 	bool bCapturing = false;
-
-	//double previousTime = 0;
 } __state;//personal style - anything file local has a __ prefix...
 //MUTABLE
 //MUTABLE
 //MUTABLE
 //MUTABLE
-
-//BEGIN FILE LOCAL FUNCTIONS
-//BEGIN FILE LOCAL FUNCTIONS
-//BEGIN FILE LOCAL FUNCTIONS
-//BEGIN FILE LOCAL FUNCTIONS
-//note that we can get away without using std::string / allocated copies
-//conceptually this is also cleaner as we are reading the immutable inputs to the program
-//static bool __main_arguments(int in_argc, char* in_argv[])
-//{
-//	if (in_argc < 2)
-//	{
-//		std::cout << "User Instructions:\n";
-//		std::cout << "\n";
-//		std::cout << "tldr: -m mesh.gltf       (loads mesh file).\n";
-//		std::cout << "      -t texture.jpg     (loads texture).\n";
-//		std::cout << "      -s 1               (sets scale to 1).\n";
-//		std::cout << "      -f                 (flips texture).\n";
-//		std::cout << "      -p save/path       (changes save dir from default).\n";
-//		std::cout << "To load a mesh, you must specify both a mesh-file and a texture-file (case sensitive) in the following manner:\n";
-//		std::cout << "meshtoimage -m pathto/mesh.file -t pathto/texture.file\n";
-//		std::cout << ".obj and .gltf works with portable version, full version adds .fbx.\n";
-//		std::cout << "The program will, by default, scale meshes by 0.01 (i.e. 1:100) since I noticed that a lot of meshes are too big for an OpenGL renderer.\n";
-//		std::cout << "To change scale, add -s followed by desired scale, i.e. -s 1, or -s 0.1.\n";
-//		std::cout << "Depending on mesh, the texture may need flipping. If you know you have the right texture but it looks broken, add -f.\n";
-//		std::cout << "\n";
-//		std::cout << "In program navigation:\n";
-//		std::cout << "\n";
-//		std::cout << "Hold left mouse button and move mouse: rotate mesh.\n";
-//		std::cout << "Hold right mouse button and move mouse: zoom mesh.\n";
-//		std::cout << "V to toggle wireframe mode.\n";
-//		std::cout << "Spacebar to toggle betweem orthographic and perspective view. (Program starts in perspective view).\n";
-//		std::cout << "WASD to pan camera in orthographic mode.\n";
-//		std::cout << "Q/E for orthographic zoom in/out. (Mouse zoom only works in perspective view).\n";
-//		std::cout << "Z/X to limit/extend depth of field in orthographic mode. (Decreases/increases far render limit).\n";
-//		std::cout << "Return to take a snapshot. Image filenames will increment while program is running.\n";
-//		std::cout << "Please note: for best result, make sure far render limit is close to the mesh.\n";
-//		return false;
-//	}
-//
-//	bool bMesh = false;
-//	bool bTexture = true;
-//
-//	int i = 1;
-//	while (i < in_argc)
-//	{
-//		/*if (
-//			0 == ::strcmp(in_argv[i], "-m") &&
-//			in_argc > i
-//			)
-//		{
-//			__state.meshFile = in_argv[i + 1];
-//			if (__state.meshFile.find(".gltf") != std::string::npos)
-//				__state.meshtype = EMeshType::GLTF;
-//			else if (__state.meshFile.find(".obj") != std::string::npos)
-//				__state.meshtype = EMeshType::OBJ;
-//			else if (__state.meshFile.find(".fbx") != std::string::npos)
-//				__state.meshtype = EMeshType::FBX;
-//			else
-//			{
-//				std::cout << "Unsupported mesh filetype.\n";
-//				return false;
-//			}
-//			bMesh = true;
-//			i++;
-//		}*/
-//		/*else if (
-//			0 == ::strcmp(in_argv[i], "-t") &&
-//			in_argc > i
-//			)
-//		{
-//			__state.texFile = in_argv[i + 1];
-//			if (
-//				__state.texFile.find(".jpg") != std::string::npos ||
-//				__state.texFile.find(".jpeg") != std::string::npos ||
-//				__state.texFile.find(".png") != std::string::npos ||
-//				__state.texFile.find(".tga") != std::string::npos ||
-//				__state.texFile.find(".gif") != std::string::npos
-//				)
-//				bTexture = true;
-//			else
-//			{
-//				std::cout << "Unsupported texture filetype.\n";
-//				return false;
-//			}
-//			i++;
-//		}*/
-//		/*else if (
-//			0 == ::strcmp(in_argv[i], "-s") &&
-//			in_argc > i
-//			)
-//		{
-//			if (!(__state.meshScale = (float)::atof(in_argv[i + 1])))
-//			{
-//				std::cout << "Failed to convert scale argument to float.\n";
-//				return false;
-//			}
-//			i++;
-//		}
-//		else if (0 == ::strcmp(in_argv[i], "-p") &&
-//			in_argc > i)
-//		{
-//			__state.filePath = in_argv[i + 1];
-//			i++;
-//		}
-//		else if (0 == ::strcmp(in_argv[i], "-f"))
-//			__state.bFlipTexture = false;
-//
-//		i++;*/
-//	}
-//
-//	return (bMesh && bTexture);
-//}
 
 static bool __find_mesh_files()
 {
@@ -320,13 +203,6 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 		}
 		return;
 	}
-	/*else if (in_key == GLFW_KEY_T && in_action == GLFW_PRESS)
-	{
-		if (!__state.bCapturing)
-			__state.bCapturing = true;
-		else
-			__state.bCapturing = false;
-	}*/
 	else if (in_key == GLFW_KEY_DOWN && in_action == GLFW_PRESS && __state.meshFile < (__state.meshFileAmount - 1))
 	{
 		__state.meshFile++;
@@ -614,10 +490,6 @@ void main()
 
 static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& projection)
 {
-	/*double currentTime = glfwGetTime();
-	static double deltaTime = 0;
-	deltaTime += (currentTime - __state.previousTime);*/
-	
 	model = glm::rotate(model, __state.subjectRotation.y * 1.5f, glm::vec3(0.f, 1.f, 0.f));
 	const float xRot = cosf(__state.subjectRotation.y * 1.5f);
 	const float zRot = sinf(__state.subjectRotation.y * 1.5f);
@@ -636,17 +508,9 @@ static void __camera_projection(glm::mat4& model, glm::mat4& view, glm::mat4& pr
 			__state.orthoZoom * ASPECT_RATIO,
 			0.01f,
 			__state.orthoFar);
-		
-		/*if (deltaTime >= 1.0)
-		{
-			std::cout << "Camera Z: " << __state.camPosition.z << " Far render: " << __state.orthoFar << std::endl;
-			deltaTime = 0;
-		}*/
 	}
 	else
 		projection = glm::perspective(glm::radians(45.f), (1.f / ASPECT_RATIO), 0.01f, 100.f);
-
-	//__state.previousTime = currentTime;
 }
 //END FILE LOCAL FUNCTIONS
 //END FILE LOCAL FUNCTIONS
@@ -691,8 +555,6 @@ int main()
 	const GLint UNIFORM_PROJECTION = glGetUniformLocation(__state.shaderProgramMesh, "projection");
 	const GLint UNIFORM_LINE = glGetUniformLocation(__state.shaderProgramText, "line");
 	const GLint UNIFORM_TEXTY = glGetUniformLocation(__state.shaderProgramText, "textY");
-
-	//__state.previousTime = glfwGetTime();
 
 	while (!glfwWindowShouldClose(__state.mainWindow))
 	{
