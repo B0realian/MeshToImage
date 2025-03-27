@@ -1,20 +1,20 @@
 #include "stdafx.h"
 
 #include "../libs/json/json.hpp"//header-only, so not in stdafx.h? dunno...
-#include <fbxsdk.h>
+//#include <fbxsdk.h>
 #include "Mesh.h"
 #include "Enums.h"
 #include "VertexN.h"
 
-#if _DEBUG
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-md.lib")
-#else
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-md.lib")
-#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-md.lib")
-#endif
+//#if _DEBUG
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libfbxsdk-mt.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\libxml2-mt.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\debug\\zlib-mt.lib")
+//#else
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libfbxsdk-mt.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\libxml2-mt.lib")
+//#pragma comment (lib, "C:\\CPP\\_libraries\\fbx_2020.3.7\\lib\\x64\\release\\zlib-mt.lib")
+//#endif
 
 Mesh::Mesh()
 {
@@ -79,16 +79,15 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 {
 	if (::strstr(in_filename, ".gltf"))
 	{
-		std::cout << "Opening file " << in_filename << std::endl;
 		std::ifstream file(in_filename);
 		if (!file)
 		{
 			std::cout << "Failed to open " << in_filename << std::endl;
 			return false;
 		}
-		std::cout << "Parsing JSON..." << std::endl;
+		//std::cout << "Parsing JSON..." << std::endl;
 		nlohmann::json json = nlohmann::json::parse(file);
-		std::cout << "Reading common gltf-variables..." << std::endl;
+		//std::cout << "Reading common gltf-variables..." << std::endl;
 		std::string uri = json["buffers"][0]["uri"];
 		uint32_t positionIndex = json["meshes"][0]["primitives"][0]["attributes"]["POSITION"];
 		uint32_t txcoordIndex = json["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_0"];
@@ -125,7 +124,7 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 		std::vector<glm::vec2> tempUVs;
 		std::vector<unsigned char> binData;
 
-		std::cout << "Looking for optional gltf-variables..." << std::endl;
+		//std::cout << "Looking for optional gltf-variables..." << std::endl;
 		if (json["bufferViews"][posBufferView].contains("byteStride"))
 			positionByteStride = json["bufferViews"][posBufferView]["byteStride"];
 		if (json["bufferViews"][txcoordBufferView].contains("byteStride"))
@@ -222,8 +221,7 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 			}
 		}
 
-
-		std::cout << "Retrieving gltf position data..." << std::endl;
+		//std::cout << "Retrieving gltf position data..." << std::endl;
 		counter = 0;
 		for (uint32_t i = positionOffset + positionAccessorByteOffset; counter < positionCount; i += posElementSize + (positionByteStride - posElementSize))
 		{
@@ -241,7 +239,7 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 			counter++;
 		}
 
-		std::cout << "Retrieving gltf uv data..." << std::endl;
+		//std::cout << "Retrieving gltf uv data..." << std::endl;
 		counter = 0;
 		for (uint32_t i = txcoordOffset + txcoordAccessorByteOffset; counter < txcoordCount; i += txcoordElementSize + (txcoordByteStride - txcoordElementSize))
 		{
@@ -257,7 +255,7 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 			counter++;
 		}
 
-		std::cout << "Retrieving gltf indices data..." << std::endl;
+		//std::cout << "Retrieving gltf indices data..." << std::endl;
 		counter = 0;
 		if (indicesType == 5121)
 		{
@@ -294,7 +292,7 @@ bool Mesh::GltfFile(const char* in_filename, const float in_mesh_scale)
 			}
 		}
 
-		std::cout << "Assembling vertices from data..." << std::endl;
+		//std::cout << "Assembling vertices from data..." << std::endl;
 		std::vector<Vertex2> vertices;
 		for (
 			uint32_t i = 0;
@@ -406,7 +404,7 @@ bool Mesh::ObjFile(const char* in_filename, const float in_mesh_scale)
 	return false;
 }
 
-//#if 0
+#if 0
 bool Mesh::FbxFile(const char* filename, const float in_mesh_scale)
 {
 	FbxManager* manager = FbxManager::Create();
@@ -515,14 +513,14 @@ bool Mesh::FbxFile(const char* filename, const float in_mesh_scale)
 
 	return false;
 }
-//#else
-//bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
-//{
-//	in_filename;//w4: unreferenced
-//	assert(0 && "Portable version lacks .fbx support.");
-//	return false;
-//}
-//#endif
+#else
+bool Mesh::FbxFile(const char* in_filename, const float in_mesh_scale)
+{
+	in_filename;//w4: unreferenced
+	assert(0 && "Portable version lacks .fbx support.");
+	return false;
+}
+#endif
 
 void Mesh::LoadBuffers(const std::vector<Vertex2>& in)
 {

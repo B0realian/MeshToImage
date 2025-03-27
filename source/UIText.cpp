@@ -125,7 +125,6 @@ void UIText::WriteLine(const char* text, const std::map<char, BMuv> &textmap, co
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexText), &vertices[0], GL_STATIC_DRAW);
 	glDrawArrays(GL_QUADS, 0, static_cast<GLsizei>(vertices.size()));
 	glBindVertexArray(0);
-	
 }
 
 

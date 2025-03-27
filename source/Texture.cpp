@@ -45,6 +45,20 @@ bool Texture::LoadTexture(const char* in_filename, const bool in_generate_mipmap
 	return true;
 }
 
+bool Texture::LoadText(const int32_t in_width, const int32_t in_height, const uint8_t* in_data)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, in_width, in_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, in_data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return true;
+}
+
 void Texture::Bind(const uint32_t texUnit)
 {
 	glActiveTexture(GL_TEXTURE0 + texUnit);

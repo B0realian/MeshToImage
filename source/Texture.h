@@ -36,6 +36,7 @@ public:
 	explicit Texture();
 	virtual ~Texture();
 	bool LoadTexture(const char* in_filename, bool in_generate_mipmaps = true, bool in_flip = true);
+	bool LoadText(const int32_t in_width, const int32_t in_height, const uint8_t* in_data);
 	void Bind(const uint32_t texUnit = 0);
 	void Unbind(const uint32_t texUnit = 0);
 	void SaveRaw(const int32_t in_width, int32_t const in_height, const int32_t in_file_num, const std::string filename, const std::string path);

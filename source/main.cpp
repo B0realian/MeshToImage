@@ -21,7 +21,12 @@ const size_t BUFFER_SIZE = 190;
 //IMMUTABLE
 
 // Requires textbuffer and textmap to be named as such.
-#define WRITE(text, f, row, colour)			{ glUniform1i(UNIFORM_LINE, row);\
+#define WRITE_PLAIN(text, row, colour)		{ glUniform1i(UNIFORM_LINE, row);\
+											snprintf(textbuffer, BUFFER_SIZE, text);\
+											textline.WriteLine(textbuffer, textmap, ETextColour:: colour); }
+
+// Requires textbuffer and textmap to be named as such. Expects a variable as second argument.
+#define WRITE_VAR(text, f, row, colour)		{ glUniform1i(UNIFORM_LINE, row);\
 											snprintf(textbuffer, BUFFER_SIZE, text, f);\
 											textline.WriteLine(textbuffer, textmap, ETextColour:: colour); }
 
@@ -35,8 +40,8 @@ static struct state_t
 
 	Mesh* meshptr;
 	std::vector<std::pair<std::string, EMeshType>> meshFiles;
-	uint16_t meshFile = 0;
-	uint16_t meshFileAmount = 0;
+	size_t meshFile = 0;
+	size_t meshFileAmount = 0;
 	std::string texFile = "";
 	std::string filePath = "captures";
 
@@ -91,7 +96,7 @@ static bool __find_mesh_files()
 		}
 		else if (entryext == ".obj")
 		{
-
+			__state.meshFiles.push_back({ entrypath, EMeshType::OBJ });
 		}
 	}
 
@@ -540,10 +545,11 @@ int main()
 		return -4;
 
 	std::map<char, BMuv> textmap;
-	if (!__state.bmText.LoadTexture("textures/bmtxt-cascadia.png", false, false))
+	if (!__state.bmText.LoadText(CascadiaWidth(), CascadiaHeight(), CascadiaData()))
 		std::cout << "Failed to load text." << std::endl;
 	else
-		GetMap(textmap);
+		GetCascadiaMap(textmap);
+	DeleteTextData();
 	UIText textline(__state.mainWindowWidth, __state.mainWindowHeight);
 	char textbuffer[BUFFER_SIZE];
 
@@ -579,10 +585,10 @@ int main()
 			glUseProgram(__state.shaderProgramText);
 			glUniform1f(UNIFORM_TEXTY, __state.textY);
 			if (__state.bOrthographic)
-				WRITE("Far render: %f", __state.orthoFar, 0, YELLOW)
+				WRITE_VAR("Far render: %f", __state.orthoFar, 0, YELLOW)
 			else
-				WRITE("Far render: 100", NULL, 0, GREEN)
-			WRITE("Mesh Z-position: %f", __state.camPosition.z, 1, YELLOW)
+				WRITE_PLAIN("Far render: 100", 0, GREEN)
+			WRITE_VAR("Mesh Z-position: %f", __state.camPosition.z, 1, YELLOW)
 			uint16_t n = 0;
 			for (uint16_t i = 0; i < 25; i++)
 			{
@@ -592,13 +598,12 @@ int main()
 					n = 0;
 
 				if ((i + n) == __state.meshFile)
-					WRITE("%s", __state.meshFiles[i + n].first.c_str(), i + 3, YELLOW)
+					WRITE_VAR("%s", __state.meshFiles[i + n].first.c_str(), i + 3, YELLOW)
 				else
-					WRITE("%s", __state.meshFiles[i + n].first.c_str(), i + 3, BLUE)
+					WRITE_VAR("%s", __state.meshFiles[i + n].first.c_str(), i + 3, BLUE)
 
 				if (i + n == __state.meshFileAmount - 1)
 					break;
-				
 			}
 			__state.bmText.Unbind();
 		}
