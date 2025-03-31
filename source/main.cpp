@@ -593,7 +593,7 @@ int main()
 			for (uint16_t i = 0; i < 25; i++)
 			{
 				if (__state.meshFile > 20)
-					n = __state.meshFile - 20;
+					n = static_cast<uint16_t>(__state.meshFile - 20);
 				else
 					n = 0;
 
