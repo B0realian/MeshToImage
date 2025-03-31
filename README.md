@@ -51,7 +51,7 @@ Space to toggle between orthographic and perspective.
 Return to take a snapshot.
 
 ## Build it yourself?
-Note that the lib folder in the repo contains the necessary includes of all libraries apart from fbx. Also note that GLM, STB and json.hpp are header only libraries so should require minimal effort to include (STB has a couple of extra rules). GLFW and GLEW need to be linked but this process is well documented elsewhere, as is linking the fbx sdk (I found https://www.youtube.com/watch?v=oIKnBVP2Jgg helpful). If making a md-build you need to change the pragmas relating to fbx in mesh.cpp to mt-libs. You need to edit those pragmas regardless to accommodate your file paths. If you are unfamiliar with how the stdafx-header is implemented, there should be ample instructions for this around the web also.
+Note that the lib folder in the repo contains the necessary includes of all libraries apart from fbx. Also note that GLM, STB and json.hpp are header only libraries so should require minimal effort to include (STB has a couple of extra rules). GLFW and GLEW need to be linked but this process is well documented elsewhere, as is linking the fbx sdk (I found https://www.youtube.com/watch?v=oIKnBVP2Jgg helpful). If making a md-build you need to change the pragmas relating to fbx in mesh.cpp to md-libs. You need to edit those pragmas regardless to accommodate your file paths. If you are unfamiliar with how the stdafx-header is implemented, there should be ample instructions for this around the web also.
 
 ### OpenGL libs
 GLEW (https://glew.sourceforge.net/)  
