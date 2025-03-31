@@ -55,6 +55,7 @@ void UIText::WriteLine(const char* text, const std::map<char, BMuv> &textmap, co
 	switch (in_colour)
 	{
 	case ETextColour::None:
+	case ETextColour::WHITE:
 		colour = glm::vec3{ 1.f, 1.f, 1.f };
 		break;
 	case ETextColour::RED:
@@ -69,8 +70,11 @@ void UIText::WriteLine(const char* text, const std::map<char, BMuv> &textmap, co
 	case ETextColour::YELLOW:
 		colour = glm::vec3{ 0.8f, 0.8f, 0.1f };
 		break;
+	case ETextColour::PURPLE:
+		colour = glm::vec3{ 0.7f, 0.1f, 0.9f };
+		break;
 	default:
-		colour = glm::vec3{ 1.f, 1.f, 1.f };
+		colour = glm::vec3{ 1.f, 0.f, 1.f }; // That Pink
 		break;
 	}
 	const size_t TEXTLENGTH = std::strlen(text);

@@ -48,7 +48,7 @@ static struct state_t
 	int32_t mainWindowHeight = 1080;
 	int32_t mainWindowWidth = 1920;
 	int32_t captures = 0;
-	uint8_t frames = 0;
+	int8_t frames = 0;
 
 	EMeshType meshtype = EMeshType::FBX;
 	float meshScale = 0.01f;
@@ -158,7 +158,7 @@ static void __capture()
 {
 	__state.texture.SaveRaw(__state.mainWindowWidth, __state.mainWindowHeight, __state.captures, __state.meshFiles[__state.meshFile].first, __state.filePath);
 	++__state.captures;
-	__state.frames = 0;
+	__state.frames = -1;
 	__state.bCapturing = false;
 }
 
@@ -585,10 +585,10 @@ int main()
 			glUseProgram(__state.shaderProgramText);
 			glUniform1f(UNIFORM_TEXTY, __state.textY);
 			if (__state.bOrthographic)
-				WRITE_VAR("Far render: %f", __state.orthoFar, 0, YELLOW)
+				WRITE_VAR("Far render: %f", __state.orthoFar, 0, RED)
 			else
-				WRITE_PLAIN("Far render: 100", 0, GREEN)
-			WRITE_VAR("Mesh Z-position: %f", __state.camPosition.z, 1, YELLOW)
+				WRITE_PLAIN("Far render: 100", 0, PURPLE)
+			WRITE_VAR("Mesh Z-position: %f", __state.camPosition.z, 1, PURPLE)
 			uint16_t n = 0;
 			for (uint16_t i = 0; i < 25; i++)
 			{
@@ -605,6 +605,16 @@ int main()
 				if (i + n == __state.meshFileAmount - 1)
 					break;
 			}
+			WRITE_PLAIN("CONTROLS:", 35, GREEN)
+			WRITE_PLAIN("Hold left mouse button to rotate, right to zoom.", 36, GREEN)
+			WRITE_PLAIN("UP/DOWN Arrow keys to navigate mesh-list.", 37, GREEN)
+			WRITE_PLAIN("WASD to pan camera.", 38, GREEN)
+			WRITE_PLAIN("V to toggle wireframe mode.", 39, GREEN)
+			WRITE_PLAIN("SPACE to toggle Orthographic mode.", 40, GREEN)
+			WRITE_PLAIN("In Orthographic Mode:", 42, RED)
+			WRITE_PLAIN("Q/E for orthographic zoom in/out.", 43, RED)
+			WRITE_PLAIN("Z/X moves far render limit closer/farther.", 44, RED)
+			WRITE_PLAIN("RETURN to take a snapshot.", 46, WHITE)
 			__state.bmText.Unbind();
 		}
 		else

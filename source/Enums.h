@@ -18,8 +18,10 @@ enum class EShaderType
 enum class ETextColour
 {
 	None,		// Equivalent to white
+	WHITE,
 	RED,
 	GREEN,
 	BLUE,
-	YELLOW
+	YELLOW,
+	PURPLE
 };
