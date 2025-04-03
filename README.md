@@ -21,7 +21,7 @@ Low resolution texture with high resolution mesh fails to bind: mesh renders bla
 Image output is limited to raw .tga for RGB and ascii .pgm for 16-bit grayscale.
 
 ## How it is used
-On startup, the program scans its current directory and subdirectories for .obj, .gltf and .fbx files (the latter only with the full version) and populates a list with the result. It also loads the first item in this list and provides up to the first 25 files as a visible list on the left in the program's window. It should be pointed out that the program will only load a single mesh file at a time, with just a main texture. For gltf files, the program will attempt to use the internal file path for the base colour texture. If no such path exists, the program will try to find a texture with a filename based on the mesh-filename in the same directory as the mesh-file. This, incidentally, is how the program searches for textures for .fbx and .obj files. 
+On startup, the program scans its current directory and subdirectories for .obj, .gltf and .fbx files (the latter only with the full version) and populates a list with the result. It also loads the first item in this list and provides up to the first 25 files as a visible list on the left in the program's window. It should be pointed out that the program will only load a single mesh file at a time, with just a main texture. For gltf files, the program will attempt to use the internal file path for the base colour texture. If no such path exists, the program will try to find a texture with a filename based on the mesh-filename in the same directory as the mesh-file. This, incidentally, is how the program searches for textures for .fbx and .obj files. Worth noting also is that the meshes are, on program startup, loaded to 1:100 scale. This is because megascan files are typically too large to fit in the space of this renderer. However, the left/right keys will decrease/increase scale in runtime.
 Meshes will be presented unlit in perspective and can be zoomed and rotated using a mouse. When the user is satisfied with how the mesh is presented, it is possible to switch to orthographic mode with further camera controls mapped to the keyboard, and take a snapshot and save RGB + Z to image files. While it is possible to take snapshots in perspective view, the resulting depth data has much lesser quality. Also, please note that max depth is at the far clipping plane, meaning you will typically want the far clipping plane to be as close to the mesh as possible for better depth data. (Holding Z will move the far clipping plane closer to the camera).
 
 ![Mostly white](textures/HeightMap1.png "Far clipping plane over the hills.")
@@ -37,6 +37,8 @@ Left mouse button and move mouse: rotate object.
 Right mouse button and move mouse: zoom in/out.
 
 Up/Down arrows to move in the list of meshes.
+
+Left/Right arrows to reload mesh in smaller/greater scale. Range 1:1000 to 1:1.
 
 WASD to pan the camera.
 
