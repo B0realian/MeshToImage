@@ -222,6 +222,20 @@ static void __on_key_down(GLFWwindow* in_window, int in_key, int in_scancode, in
 		__find_texture(*__state.meshptr);
 		__set_window_title();
 	}
+	else if (in_key == GLFW_KEY_RIGHT && in_action == GLFW_PRESS && __state.meshScale < 0.8f)
+	{
+		__state.meshScale *= 10;
+		__state.meshptr->LoadMesh(__state.meshFiles[__state.meshFile].first.c_str(), __state.meshFiles[__state.meshFile].second, __state.meshScale);
+		__find_texture(*__state.meshptr);
+		__set_window_title();
+	}
+	else if (in_key == GLFW_KEY_LEFT && in_action == GLFW_PRESS && __state.meshScale > 0.005f)
+	{
+		__state.meshScale *= 0.1;
+		__state.meshptr->LoadMesh(__state.meshFiles[__state.meshFile].first.c_str(), __state.meshFiles[__state.meshFile].second, __state.meshScale);
+		__find_texture(*__state.meshptr);
+		__set_window_title();
+	}
 
 	else if (
 		in_key == GLFW_KEY_E &&
@@ -608,13 +622,14 @@ int main()
 			WRITE_PLAIN("CONTROLS:", 35, GREEN)
 			WRITE_PLAIN("Hold left mouse button to rotate, right to zoom.", 36, GREEN)
 			WRITE_PLAIN("UP/DOWN Arrow keys to navigate mesh-list.", 37, GREEN)
-			WRITE_PLAIN("WASD to pan camera.", 38, GREEN)
+			WRITE_PLAIN("LEFT/RIGHT Arrow keys to decrease/increase scale.", 38, GREEN)
 			WRITE_PLAIN("V to toggle wireframe mode.", 39, GREEN)
 			WRITE_PLAIN("SPACE to toggle Orthographic mode.", 40, GREEN)
 			WRITE_PLAIN("In Orthographic Mode:", 42, RED)
-			WRITE_PLAIN("Q/E for orthographic zoom in/out.", 43, RED)
-			WRITE_PLAIN("Z/X moves far render limit closer/farther.", 44, RED)
-			WRITE_PLAIN("RETURN to take a snapshot.", 46, WHITE)
+			WRITE_PLAIN("WASD to pan camera.", 43, RED)
+			WRITE_PLAIN("Q/E for orthographic zoom in/out.", 44, RED)
+			WRITE_PLAIN("Z/X moves far render limit closer/farther.", 45, RED)
+			WRITE_PLAIN("RETURN to take a snapshot.", 47, WHITE)
 			__state.bmText.Unbind();
 		}
 		else
